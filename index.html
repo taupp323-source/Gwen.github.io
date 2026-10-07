@@ -55,7 +55,7 @@
             padding: 0 5vw 8vh 5vw; 
             gap: 2vw; 
             width: max-content; min-width: 100%; height: 100%;
-            /* 居中视觉补偿 */
+            /* 居中视觉补偿，修正偏左错觉 */
             transform: translateX(-3vw);
         }
 
@@ -96,4 +96,43 @@
         .click-hint { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
-        .cover-big-title { font-family: 'Playfair Display', serif; font-size: 8vw; color: rgba(255,255,255,0.2); text-transform: uppercase; font-weight
+        .cover-big-title { font-family: 'Playfair Display', serif; font-size: 8vw; color: rgba(255,255,255,0.2); text-transform: uppercase; font-weight: 900; line-height: 0.9; pointer-events: none;}
+        .handwritten-text { font-family: 'Noto Serif SC', serif; color: #334155; }
+
+        /* ================= 3. 长图流与动效设定 ================= */
+        #view-scroll { overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+        .animate-float { animation: float-photo 6s ease-in-out infinite; }
+        @keyframes float-photo { 0% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(-1deg); } 100% { transform: translateY(0px) rotate(-2deg); } }
+
+        .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        .hero-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 10; }
+        .hero-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .hero-content { position: relative; z-index: 20; color: #ffffff; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <!-- ================= 唯一保留的层：首页书架 ================= -->
+    <div id="view-shelf" class="view-section view-active flex flex-col justify-between">
+        <header id="shelf-header" class="w-full flex flex-col items-center justify-center shrink-0 z-10 pointer-events-none">
+            <p class="text-xs tracking-[0.4em] text-gray-500 mb-4 font-serif uppercase mt-8">Chapter 1</p>
+            <h1 class="hero-title text-6xl md:text-[7rem] font-black text-center text-[#1A1A1A]">
+                WELCOME TO<br>MY SPACE
+            </h1>
+        </header>
+
+        <div class="shelf-container">
+            <div class="perspective-scene">
+                <!-- 降低了所有书本的高度，防止挡住英文标题 -->
+                <div onclick="openDetailView(0)" class="book-3d shadow-xl" style="--w: 7vw; --h: 60vh; --d: 25vw; --bg: #2B3A4A; --side-bg: #1F2A36; --text-color: #FFFFFF;">
+                    <div class="face front tex-linen"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.01</span><span class="spine-text-sans text-4xl uppercase font-black">ABOUT ME</span></div>
+                    <div class="face right tex-linen"><span class="cover-decor text-white/10">ABOUT</span></div><div class="face top"></div>
+                </div>
+
+                <div onclick="openDetailView(1)" class="book-3d shadow-2xl" style="--w: 6.5vw; --h: 46vh; --d: 24vw; --bg: #8B3A3A; --side-bg: #6B2C2C; --text-color: #F7F6F2;">
+                    <div class="face front tex-noise"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.02</span><span class="spine-text-zh text-2xl font
