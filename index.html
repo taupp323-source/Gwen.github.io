@@ -55,7 +55,7 @@
             padding: 0 5vw 8vh 5vw; 
             gap: 2vw; 
             width: max-content; min-width: 100%; height: 100%;
-            /* 居中视觉补偿，修正偏左错觉 */
+            /* 居中视觉补偿 */
             transform: translateX(-3vw);
         }
 
@@ -117,7 +117,7 @@
 </head>
 <body>
 
-    <!-- ================= 唯一保留的层：首页书架 ================= -->
+    <!-- ================= 核心视图 1：首页书架 ================= -->
     <div id="view-shelf" class="view-section view-active flex flex-col justify-between">
         <header id="shelf-header" class="w-full flex flex-col items-center justify-center shrink-0 z-10 pointer-events-none">
             <p class="text-xs tracking-[0.4em] text-gray-500 mb-4 font-serif uppercase mt-8">Chapter 1</p>
@@ -128,7 +128,7 @@
 
         <div class="shelf-container">
             <div class="perspective-scene">
-                <!-- 降低了所有书本的高度，防止挡住英文标题 -->
+                <!-- 降低书本高度防止遮挡 -->
                 <div onclick="openDetailView(0)" class="book-3d shadow-xl" style="--w: 7vw; --h: 60vh; --d: 25vw; --bg: #2B3A4A; --side-bg: #1F2A36; --text-color: #FFFFFF;">
                     <div class="face front tex-linen"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.01</span><span class="spine-text-sans text-4xl uppercase font-black">ABOUT ME</span></div>
                     <div class="face right tex-linen"><span class="cover-decor text-white/10">ABOUT</span></div><div class="face top"></div>
@@ -167,7 +167,7 @@
         </div>
     </div>
 
-    <!-- ================= 唯一保留的层：中间前导页 ================= -->
+    <!-- ================= 核心视图 2：中间前导页 ================= -->
     <div id="detail-view" class="view-section view-hidden text-white">
         <button onclick="handleBackToShelf()" class="absolute top-8 left-8 md:top-10 md:left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-opacity z-50 border-b border-white/30 pb-1">
             ← Back
@@ -177,7 +177,6 @@
             <div class="book-area">
                 <div class="flip-perspective">
                     <div class="flip-book" id="active-cover" onclick="openScrollContent()">
-                        <!-- 封面由JS动态注入 -->
                     </div>
                 </div>
             </div>
@@ -200,7 +199,7 @@
         </div>
     </div>
 
-    <!-- ================= 唯一保留的层：长图流阅览页 ================= -->
+    <!-- ================= 核心视图 3：长图流阅览页 ================= -->
     <div id="view-scroll" class="view-section view-hidden bg-transparent text-white hide-scrollbar">
         <div class="sticky top-0 z-[100] w-full h-0">
             <button onclick="handleBackToDetail()" id="scroll-back-btn" class="absolute top-8 left-8 md:top-10 md:left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-all border-b border-white/30 pb-1 bg-black/40 p-2 rounded backdrop-blur-sm shadow-lg text-white">
@@ -210,11 +209,12 @@
 
         <div class="w-full flex flex-col items-center">
             <div id="scroll-pages-container" class="w-full flex flex-col items-center w-full">
-                <!-- 内容由JS动态注入 -->
+                <!-- 内容JS动态注入 -->
             </div>
         </div>
     </div>
 
+    <!-- ================= 逻辑脚本 ================= -->
     <script>
         const bookData = [
             { vol: "VOL.01", title: "About Me", sub: "个人简介", desc: "你好，我是蒲慧玟。我相信优秀的设计与运营不仅仅是视觉的点缀，更是信息逻辑的重构与传播维度的拓展。", themeColor: "#1B242C", coverColor: "#2B3A4A", texClass: "tex-linen", short: "ABOUT", bgImg: "", cw: "28vw", ch: "76vh" },
@@ -417,43 +417,27 @@
                         </div>
                     `;
                 } else if (currentIndex === 1) {
-                    // ================= VOL.02 排版设计：左右垫片保证滑动时图片不被切 =================
                     pageContainer.innerHTML = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-[#FAFAFA] text-[#1A1A1A] flex flex-col items-center pb-32 font-serif relative">
                             
-                            <div class="w-full mt-16 md:mt-24 flex flex-col items-center overflow-hidden w-full">
-                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-8 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200 max-w-7xl px-4">
+                            <!-- 第一部分：排版设计全展示居中 -->
+                            <div class="w-full max-w-[95vw] md:max-w-7xl mt-16 md:mt-24 flex flex-col items-center">
+                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-8 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200 px-4">
                                     <span class="font-bold text-gray-800">Showcase</span>
                                     <span>Typography</span>
                                 </div>
                                 
-                                <div class="w-full flex overflow-x-auto gap-8 md:gap-12 pb-12 items-start hide-scrollbar reveal snap-x snap-mandatory">
-                                    <!-- 核心修复：绝对等距的左右隐藏垫片，保证划到底时也有留白 -->
-                                    <div class="flex-none w-[4vw] md:w-[15vw] snap-center"></div>
-                                    
-                                    <div class="flex-none w-[80vw] md:w-[22vw] snap-center">
-                                        <img src="typeset1.png" alt="排版1" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
-                                    </div>
-                                    <div class="flex-none w-[80vw] md:w-[22vw] snap-center">
-                                        <img src="typeset2.png" alt="排版2" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
-                                    </div>
-                                    <div class="flex-none w-[80vw] md:w-[22vw] snap-center">
-                                        <img src="typeset3.png" alt="排版3" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
-                                    </div>
-                                    <div class="flex-none w-[80vw] md:w-[22vw] snap-center">
-                                        <img src="typeset4.png" alt="排版4" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
-                                    </div>
-                                    
-                                    <div class="flex-none w-[4vw] md:w-[15vw] snap-center"></div>
-                                </div>
-                                
-                                <div class="text-center text-gray-400 text-xs tracking-widest uppercase animate-pulse mt-4">
-                                    ← Swipe horizontally to explore →
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 w-full px-2 md:px-8 reveal items-start">
+                                    <img src="typeset1.png" alt="排版1" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
+                                    <img src="typeset2.png" alt="排版2" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] delay-100">
+                                    <img src="typeset3.png" alt="排版3" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] delay-200">
+                                    <img src="typeset4.png" alt="排版4" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] delay-300">
                                 </div>
                             </div>
 
-                            <div class="w-full max-w-5xl mt-24 flex flex-col items-center px-6 reveal">
+                            <!-- 第二部分：微信公众号跳转卡片 -->
+                            <div class="w-full max-w-5xl mt-32 flex flex-col items-center px-6 reveal">
                                 <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-12 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200">
                                     <span class="font-bold text-gray-800">Official Account</span>
                                     <span>WeChat</span>
@@ -472,6 +456,7 @@
                                 </a>
                             </div>
 
+                            <!-- 第三部分：小红书账号运营 -->
                             <div class="w-full max-w-5xl mt-32 flex flex-col items-center px-6 reveal delay-100">
                                 <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-12 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200">
                                     <span class="font-bold text-gray-800">Social Media</span>
@@ -543,15 +528,13 @@
                         </div>
                     `;
                 } else if (currentIndex === 5) {
-                    // ================= VOL.06 短视频创作：超大视频容器，不裁剪画面比例 =================
+                    // ================= VOL.06 短视频创作：超大视频，图文并排排列 =================
                     pageContainer.innerHTML = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-[#0D0D0D] text-[#F7F6F2] pb-32 relative overflow-hidden">
                             <div class="relative z-10 w-full max-w-[95vw] md:max-w-7xl mx-auto px-4 mt-16 md:mt-24 gap-24 flex flex-col">
                                 
-                                <!-- 视频1：左边放大占8格 -->
                                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8 w-full items-center reveal">
-                                    <!-- 核心修改：移除 aspect-video，使用 w-full h-auto 让视频按原始比例自由撑开，绝对不裁切！ -->
                                     <div class="md:col-span-8 w-full bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-1 md:order-1">
                                         <video class="portfolio-video w-full h-auto block" src="video1.mp4" controls autoplay muted loop playsinline></video>
                                     </div>
@@ -562,7 +545,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- 视频2：右边放大占8格 -->
                                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8 w-full items-center reveal delay-100">
                                     <div class="md:col-span-4 flex flex-col justify-center text-center md:text-right order-2 md:order-1 px-6">
                                         <h3 class="text-2xl md:text-3xl font-black font-serif mb-4 text-white tracking-widest">坳上古村宣传</h3>
