@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人作品集 - The Personal Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --bg-color: #F4F3ED; }
+
+        /* 锁死底层页面，彻底杜绝全局滚动 */
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; position: fixed;
+            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: background-color 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .hero-title { font-family: 'Playfair Display', serif; line-height: 0.85; letter-spacing: -0.02em; }
+        .spine-text-en { writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 0.15em; font-family: 'Playfair Display', serif; }
+        .spine-text-zh { writing-mode: vertical-rl; text-orientation: upright; font-family: 'Noto Serif SC', serif; letter-spacing: 0.25em; }
+        .spine-text-sans { writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 0.15em; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* ================= 视图底层框架 ================= */
+        .view-section {
+            position: absolute; inset: 0; width: 100vw; height: 100vh;
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .view-active { opacity: 1; pointer-events: auto; transform: scale(1); z-index: 10; }
+        .view-hidden { opacity: 0; pointer-events: none; transform: scale(0.96); z-index: -1; }
+
+        /* ================= 1. 首页 3D 书架 ================= */
+        #shelf-header { height: 28vh; } 
+        
+        .shelf-container {
+            width: 100%; height: 72vh; 
+            overflow-x: auto; overflow-y: visible; 
+            scroll-behavior: smooth;
+        }
+
+        .perspective-scene {
+            perspective: 2500px; 
+            perspective-origin: 50% -20%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-end; 
+            padding: 0 5vw 8vh 5vw; 
+            gap: 2vw; 
+            width: max-content; min-width: 100%; height: 100%;
+            transform: translateX(-3vw);
+        }
+
+        @media (max-width: 768px) {
+            .perspective-scene { justify-content: flex-start; padding: 0 10vw 8vh 10vw; transform: translateX(0); }
+        }
+
+        .book-3d {
+            position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d;
+            transform: rotateY(-30deg) translateZ(0); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer; flex-shrink: 0; box-shadow: -15px 25px 30px rgba(0,0,0,0.15);
+        }
+        .book-3d:hover { transform: rotateY(-10deg) translateZ(50px) translateY(-15px); }
+
+        .face { position: absolute; top: 0; left: 0; backface-visibility: visible; }
+        .face.front { width: var(--w); height: var(--h); background-color: var(--bg); transform: translateZ(0); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 2vh 0; color: var(--text-color); border-radius: 2px 0 0 2px;}
+        .face.right { width: var(--d); height: var(--h); background-color: var(--side-bg); transform-origin: left; transform: translateX(var(--w)) rotateY(90deg); border-left: 2px solid rgba(0,0,0,0.2); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .face.top { width: var(--w); height: var(--d); background-color: #E8E6DF; transform-origin: top; transform: rotateX(-90deg); background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px); }
+        .cover-decor { font-family: 'Playfair Display', serif; font-size: 5rem; color: rgba(255,255,255,0.04); writing-mode: vertical-rl; white-space: nowrap; font-weight: 900; }
+
+        .tex-linen::after { content:''; position:absolute; inset:0; pointer-events:none; background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px), repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); }
+        .tex-noise::after { content:''; position:absolute; inset:0; pointer-events:none; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.15"/></svg>'); mix-blend-mode: multiply; }
+        .tex-kraft::after { content:''; position:absolute; inset:0; pointer-events:none; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.4" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.12"/></svg>'), repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(0,0,0,0.02) 10px, rgba(0,0,0,0.02) 12px); mix-blend-mode: color-burn;}
+        .tex-matte::after { content:''; position:absolute; inset:0; pointer-events:none; background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08) 0%, transparent 60%); }
+
+        /* ================= 2. 详情前导页引擎 ================= */
+        .detail-wrapper { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; }
+        .book-area { width: 45vw; height: 100%; display: flex; justify-content: center; align-items: center; transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .text-area { width: 40vw; transition: all 0.5s ease; opacity: 1; padding-right: 10vw; }
+        
+        #detail-view.is-open .text-area { width: 0; opacity: 0; padding-right: 0; pointer-events: none; }
+        #detail-view.is-open .book-area { width: 100vw; } 
+        #detail-view.is-open .flip-book { transform: translateX(0) rotateY(0deg) rotateX(0deg) scale(1.15); }
+
+        .flip-perspective { perspective: 3500px; display: flex; justify-content: center; align-items: center; }
+        .flip-book { position: relative; transform-style: preserve-3d; transform: translateX(0) rotateY(-15deg) rotateX(2deg); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; }
+        
+        .click-hint { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        .cover-big-title { font-family: 'Playfair Display', serif; font-size: 8vw; color: rgba(255,255,255,0.2); text-transform: uppercase; font-weight: 900; line-height: 0.9; pointer-events: none;}
+        .handwritten-text { font-family: 'Noto Serif SC', serif; color: #334155; }
+
+        /* ================= 3. 长图流与动效设定 ================= */
+        #view-scroll { overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+        .animate-float { animation: float-photo 6s ease-in-out infinite; }
+        @keyframes float-photo { 0% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(-1deg); } 100% { transform: translateY(0px) rotate(-2deg); } }
+
+        .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        .hero-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 10; }
+        .hero-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .hero-content { position: relative; z-index: 20; color: #ffffff; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <!-- 首页书架 -->
+    <div id="view-shelf" class="view-section view-active flex flex-col justify-between">
+        <header id="shelf-header" class="w-full flex flex-col items-center justify-center shrink-0 z-10 pointer-events-none">
+            <p class="text-xs tracking-[0.4em] text-gray-500 mb-4 font-serif uppercase mt-8">Chapter 1</p>
+            <h1 class="hero-title text-6xl md:text-[7rem] font-black text-center text-[#1A1A1A]">
+                WELCOME TO<br>MY SPACE
+            </h1>
+        </header>
+
+        <div class="shelf-container">
+            <div class="perspective-scene">
+                <div onclick="openDetailView(0)" class="book-3d shadow-xl" style="--w: 7vw; --h: 60vh; --d: 25vw; --bg: #2B3A4A; --side-bg: #1F2A36; --text-color: #FFFFFF;">
+                    <div class="face front tex-linen"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.01</span><span class="spine-text-sans text-4xl uppercase font-black">ABOUT ME</span></div>
+                    <div class="face right tex-linen"><span class="cover-decor text-white/10">ABOUT</span></div><div class="face top"></div>
+                </div>
+
+                <div onclick="openDetailView(1)" class="book-3d shadow-2xl" style="--w: 6.5vw; --h: 46vh; --d: 24vw; --bg: #8B3A3A; --side-bg: #6B2C2C; --text-color: #F7F6F2;">
+                    <div class="face front tex-noise"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.02</span><span class="spine-text-zh text-2xl font-bold">排版设计</span></div>
+                    <div class="face right tex-noise"><span class="cover-decor text-white/10">TYPO</span></div><div class="face top"></div>
+                </div>
+
+                <div onclick="openDetailView(2)" class="book-3d shadow-2xl" style="--w: 8vw; --h: 53vh; --d: 26vw; --bg: #1A1A1A; --side-bg: #111111; --text-color: #F7F6F2;">
+                    <div class="face front tex-matte"><span class="absolute top-6 text-sm opacity-60 font-serif">VOL.03</span><span class="spine-text-zh text-3xl font-black">品牌包装设计</span></div>
+                    <div class="face right tex-matte"><span class="cover-decor text-white/5">BRAND</span></div><div class="face top"></div>
+                </div>
+
+                <div onclick="openDetailView(3)" class="book-3d shadow-xl" style="--w: 6vw; --h: 41vh; --d: 23vw; --bg: #D48E45; --side-bg: #B07435; --text-color: #1A1A1A;">
+                    <div class="face front tex-kraft"><span class="absolute top-6 text-xs opacity-60 font-serif">VOL.04</span><span class="spine-text-zh text-2xl font-bold">文创设计</span></div>
+                    <div class="face right tex-kraft"><span class="cover-decor text-black/10">CRAFT</span></div><div class="face top"></div>
+                </div>
+                
+                <div onclick="openDetailView(4)" class="book-3d shadow-xl" style="--w: 5vw; --h: 48vh; --d: 21vw; --bg: #C19A5C; --side-bg: #A37F46; --text-color: #FFFFFF;">
+                    <div class="face front tex-linen"><span class="absolute top-6 text-xs opacity-60 font-serif">VOL.05</span><span class="spine-text-zh text-xl font-bold">IP形象设计</span></div>
+                    <div class="face right tex-linen"><span class="cover-decor text-black/10">CHARA</span></div><div class="face top"></div>
+                </div>
+                
+                <div onclick="openDetailView(5)" class="book-3d shadow-md" style="--w: 6.5vw; --h: 38vh; --d: 23vw; --bg: #739E9E; --side-bg: #5A7D7D; --text-color: #FFFFFF;">
+                    <div class="face front tex-noise"><span class="absolute top-6 text-xs opacity-60 font-serif">VOL.06</span><span class="spine-text-zh text-2xl font-bold">短视频创作</span></div>
+                    <div class="face right tex-noise"><span class="cover-decor text-white/10">MOTION</span></div><div class="face top"></div>
+                </div>
+
+                <div onclick="openDetailView(6)" class="book-3d shadow-md" style="--w: 6.5vw; --h: 55vh; --d: 24vw; --bg: #828587; --side-bg: #686A6C; --text-color: #F7F6F2;">
+                    <div class="face front tex-matte"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.07</span><span class="spine-text-zh text-3xl font-bold">电商美工</span></div>
+                    <div class="face right tex-matte"><span class="cover-decor text-white/10">STORE</span></div><div class="face top"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 中间前导页 -->
+    <div id="detail-view" class="view-section view-hidden text-white">
+        <button onclick="handleBackToShelf()" class="absolute top-8 left-8 md:top-10 md:left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-opacity z-50 border-b border-white/30 pb-1">
+            ← Back
+        </button>
+
+        <div class="detail-wrapper">
+            <div class="book-area">
+                <div class="flip-perspective">
+                    <div class="flip-book" id="active-cover" onclick="openScrollContent()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-area font-serif flex flex-col justify-center">
+                <div class="text-xs tracking-widest uppercase opacity-50 mb-8 border-b border-white/20 pb-4 flex justify-between">
+                    <span>Selected Collection</span>
+                    <span id="detail-vol">VOL.03</span>
+                </div>
+                <h1 class="text-5xl lg:text-6xl font-black mb-6 leading-tight" id="detail-title">品牌包装设计</h1>
+                <h2 class="text-xl italic mb-10 opacity-80" id="detail-subtitle">克制与高级感的视觉传达</h2>
+                <p class="text-sm md:text-base leading-relaxed opacity-70 mb-12 max-w-md text-gray-300" id="detail-summary">
+                    内容摘要
+                </p>
+                <div class="border border-white/30 py-4 px-6 uppercase text-xs tracking-widest cursor-pointer hover:bg-white/10 transition-colors max-w-sm flex justify-between items-center" onclick="openScrollContent()">
+                    <span>Click Book to Open</span>
+                    <span class="text-lg">📖</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 长图流阅览页 -->
+    <div id="view-scroll" class="view-section view-hidden bg-transparent text-white hide-scrollbar">
+        <div class="sticky top-0 z-[100] w-full h-0">
+            <button onclick="handleBackToDetail()" id="scroll-back-btn" class="absolute top-8 left-8 md:top-10 md:left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-all border-b border-white/30 pb-1 bg-black/40 p-2 rounded backdrop-blur-sm shadow-lg text-white">
+                ← Back
+            </button>
+        </div>
+
+        <div class="w-full flex flex-col items-center">
+            <div id="scroll-pages-container" class="w-full flex flex-col items-center w-full">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bookData = [
+            { vol: "VOL.01", title: "About Me", sub: "个人简介", desc: "你好，我是蒲慧玟。我相信优秀的设计与运营不仅仅是视觉的点缀，更是信息逻辑的重构与传播维度的拓展。", themeColor: "#1B242C", coverColor: "#2B3A4A", texClass: "tex-linen", short: "ABOUT", bgImg: "", cw: "28vw", ch: "76vh" },
+            { vol: "VOL.02", title: "排版设计", sub: "中英文字体排印与网格系统", desc: "探讨汉字在现代网格系统中的表现张力，构建理性的视觉秩序。", themeColor: "#3B1B1B", coverColor: "#8B3A3A", texClass: "tex-noise", short: "TYPO", bgImg: "bg2.jpg", cw: "24vw", ch: "50vh" },
+            { vol: "VOL.03", title: "品牌包装设计", sub: "克制与高级感的视觉传达", desc: "摒弃繁冗陈旧的视觉堆砌，尝试在极简的奶油白与深沉暗色系之间寻找平衡。", themeColor: "#3D3833", coverColor: "#1A1A1A", texClass: "tex-matte", short: "BRAND", bgImg: "bg3.jpg", cw: "26vw", ch: "58vh" },
+            { vol: "VOL.04", title: "文创设计", sub: "非遗文化与地质美学的现代转化", desc: "挖掘地域性的工业遗产与非遗文化，重构为符合现代审美的产品体验。", themeColor: "#4A321E", coverColor: "#D48E45", texClass: "tex-kraft", short: "CRAFT", bgImg: "bg4.jpg", cw: "23vw", ch: "45vh" },
+            { vol: "VOL.05", title: "IP形象设计", sub: "角色设定与视觉延展", desc: "IP不仅仅是一个吉祥物，更是品牌性格的具象化表达。", themeColor: "#4A3A22", coverColor: "#C19A5C", texClass: "tex-linen", short: "CHARA", bgImg: "bg5.jpg", cw: "21vw", ch: "52vh" },
+            { vol: "VOL.06", title: "短视频创作", sub: "动态视觉与叙事节奏", desc: "通过镜头语言与剪辑节奏，让静态的品牌视觉动起来，传递更丰富的情绪价值与沉浸感。", themeColor: "#2F4242", coverColor: "#739E9E", texClass: "tex-noise", short: "MOTION", bgImg: "bg6.jpg", cw: "23vw", ch: "42vh" },
+            { vol: "VOL.07", title: "电商美工", sub: "AIGC 驱动的商品视觉重塑", desc: "结合前沿的生成式 AI 工具，探索高效率、高品质的电商场景渲染，重塑商品的视觉表现力。", themeColor: "#323334", coverColor: "#828587", texClass: "tex-matte", short: "STORE", bgImg: "bg7.jpg", cw: "24vw", ch: "60vh" }
+        ];
+
+        const viewShelf = document.getElementById('view-shelf');
+        const viewDetail = document.getElementById('detail-view');
+        const viewScroll = document.getElementById('view-scroll');
+        const rootStyle = document.documentElement.style;
+        const activeCover = document.getElementById('active-cover');
+        const pageContainer = document.getElementById('scroll-pages-container');
+        
+        let currentIndex = 0;
+
+        function openDetailView(index) {
+            currentIndex = index;
+            const data = bookData[index];
+            
+            document.getElementById('detail-vol').innerText = data.vol;
+            document.getElementById('detail-title').innerText = data.title;
+            document.getElementById('detail-subtitle').innerText = data.sub;
+            document.getElementById('detail-summary').innerText = data.desc;
+            
+            activeCover.style.width = data.cw;
+            activeCover.style.height = data.ch;
+            activeCover.innerHTML = `
+                <div class="${data.texClass} w-full h-full relative overflow-hidden" style="background-color: ${data.coverColor}; border-radius: 2px 6px 6px 2px; box-shadow: 15px 15px 30px rgba(0,0,0,0.3);">
+                    <div class="absolute inset-0 flex flex-col justify-center items-center">
+                        <div class="cover-big-title text-center w-full">${data.short}</div>
+                        <div class="absolute bottom-6 right-6 click-hint text-white/70 text-xs tracking-widest uppercase font-serif">Click to Read →</div>
+                    </div>
+                </div>
+            `;
+            
+            rootStyle.setProperty('--bg-color', data.themeColor);
+            viewDetail.classList.remove('is-open'); 
+            
+            viewShelf.classList.replace('view-active', 'view-hidden');
+            setTimeout(() => { viewDetail.classList.replace('view-hidden', 'view-active'); }, 400);
+        }
+
+        function generateHeroSection(data) {
+            return `
+                <div class="w-full min-h-[70vh] md:min-h-[85vh] bg-[#0D0D0D] flex items-center justify-center relative overflow-hidden px-8">
+                    <img src="${data.bgImg}" alt="Background" class="hero-bg-img">
+                    <div class="hero-overlay"></div>
+                    
+                    <div class="max-w-4xl w-full flex flex-col items-center text-center hero-content reveal">
+                        <h1 class="text-5xl md:text-7xl font-serif font-black mb-4 tracking-wider">${data.title}</h1>
+                        <p class="text-xs md:text-sm text-gray-300 tracking-[0.3em] uppercase mb-8 opacity-80">${data.short} PROJECT</p>
+                        <p class="text-base md:text-xl font-bold mb-6 tracking-wider opacity-90">${data.sub}</p>
+                        <p class="text-sm md:text-base text-gray-300 leading-loose max-w-2xl opacity-80">${data.desc}</p>
+                    </div>
+                    
+                    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center opacity-50 animate-bounce hero-content">
+                        <span class="text-xs tracking-widest uppercase mb-2">Scroll Down</span>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openScrollContent() {
+            viewDetail.classList.add('is-open');
+            
+            setTimeout(() => {
+                const data = bookData[currentIndex];
+                
+                if (currentIndex === 0) {
+                    pageContainer.innerHTML = `
+                        <div class="w-full min-h-[90vh] py-20 flex flex-col items-center justify-center bg-[#E5A96A] relative overflow-hidden">
+                            <div class="text-[12rem] md:text-[20rem] font-serif font-bold text-[#A3662A] opacity-20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none whitespace-nowrap z-0">ABOUT ME</div>
+                            <div class="relative z-10 w-full max-w-5xl px-6 flex flex-col md:flex-row items-center justify-center gap-8 reveal">
+                                <div class="w-full md:w-1/3 mt-12 md:mt-24 transform md:-rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
+                                    <div class="bg-white p-3 pb-10 shadow-xl border border-gray-100 rounded-sm">
+                                        <img src="33973da6beab4392e93e2edca6dd34bf.jpg" alt="风景照" class="w-full aspect-[3/4] object-cover rounded-sm">
+                                    </div>
+                                </div>
+                                <div class="w-full md:w-1/3 z-20 transform hover:scale-105 transition-all duration-500">
+                                    <div class="bg-white p-4 pb-12 shadow-2xl border border-gray-100 rounded-sm">
+                                        <img src="cc6c6feb2ed5ddd4f9b3d89278a24f30.jpg" alt="证件照" class="w-full aspect-[3/4] object-cover rounded-sm">
+                                    </div>
+                                </div>
+                                <div class="w-full md:w-1/3 mt-12 md:mt-24 transform md:rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10 delay-100">
+                                    <div class="bg-white p-3 pb-10 shadow-xl border border-gray-100 rounded-sm">
+                                        <img src="d30a334d48491fe5acc278013d6bb293.jpg" alt="生活照" class="w-full aspect-[3/4] object-cover rounded-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full bg-[#F4F4F5] text-black relative border-t-4 border-white/50">
+                            <div class="max-w-6xl mx-auto w-full p-10 md:p-24 flex flex-col">
+                                <div class="text-3xl md:text-5xl font-black mb-16 tracking-tighter text-gray-900 flex items-center reveal">
+                                    Profile <svg class="w-6 h-6 md:w-10 md:h-10 ml-4" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-16 relative">
+                                    <div class="reveal">
+                                        <p class="text-sm font-bold text-gray-800 tracking-widest uppercase mb-3">姓名 / 性别</p>
+                                        <p class="handwritten-text text-xl md:text-2xl leading-relaxed">蒲慧玟 / 女</p>
+                                    </div>
+                                    <div class="reveal delay-100">
+                                        <p class="text-sm font-bold text-gray-800 tracking-widest uppercase mb-3">教育背景</p>
+                                        <p class="handwritten-text text-lg md:text-xl leading-loose">湘南学院 (2023.09 - 2027.06)<br>视觉传达设计专业 本科</p>
+                                    </div>
+                                    <div class="reveal delay-200">
+                                        <p class="text-sm font-bold text-gray-800 tracking-widest uppercase mb-3">主修课程</p>
+                                        <p class="handwritten-text text-lg md:text-xl leading-loose">文创产品设计、书籍装帧设计、包装设计、广告设计等</p>
+                                    </div>
+                                    <div class="reveal delay-300">
+                                        <p class="text-sm font-bold text-gray-800 tracking-widest uppercase mb-3">联系邮箱</p>
+                                        <p class="handwritten-text text-lg md:text-xl leading-relaxed">2961007491@qq.com / tau.pp.323@gmail.com</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full bg-white text-black select-none">
+                            <div class="max-w-6xl mx-auto w-full p-10 md:p-24 flex flex-col justify-start">
+                                <div class="flex items-center mb-16 pb-4 border-b-[3px] border-black reveal">
+                                    <svg class="w-10 h-10 mr-4 text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 12l10 5 10-5M2 17l10 5 10-5"/></svg>
+                                    <h3 class="text-3xl font-black tracking-widest text-black">实践经历 <span class="text-sm font-bold tracking-normal uppercase ml-4 text-gray-700">/ EXPERIENCE</span></h3>
+                                </div>
+                                <div class="mb-12 reveal">
+                                    <div class="flex items-center mb-4">
+                                        <span class="text-base font-bold text-black w-24 tracking-widest">校外实践</span>
+                                        <span class="text-2xl font-black text-black tracking-wider mx-4">七彩艺术学校</span>
+                                        <span class="text-base font-bold text-gray-700 tracking-wide">助教老师</span>
+                                    </div>
+                                    <div class="flex items-stretch">
+                                        <div class="text-base text-gray-800 font-bold w-24 text-right pr-6 border-r-[3px] border-black flex flex-col justify-start pt-1 tracking-wider">
+                                            <span>2024.03</span><span class="text-sm my-1">-</span><span>2024.07</span>
+                                        </div>
+                                        <div class="flex-1 pl-6 text-base md:text-lg text-gray-900 leading-loose font-medium text-justify">
+                                            工作经验：制定课程学习计划，指导学习内容，主要助教黑白画和动漫和手工课，当过主教一段时间，也上过一段时间水粉。
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-12 reveal delay-100">
+                                    <div class="flex items-center mb-4">
+                                        <span class="text-base font-bold text-black w-24 tracking-widest">校外实践</span>
+                                        <span class="text-2xl font-black text-black tracking-wider mx-4">斯达营地</span>
+                                        <span class="text-base font-bold text-gray-700 tracking-wide">抖音账号运营</span>
+                                    </div>
+                                    <div class="flex items-stretch">
+                                        <div class="text-base text-gray-800 font-bold w-24 text-right pr-6 border-r-[3px] border-black flex flex-col justify-start pt-1 tracking-wider">
+                                            <span>2026.01</span><span class="text-sm my-1">-</span><span>2026.02</span>
+                                        </div>
+                                        <div class="flex-1 pl-6 text-base md:text-lg text-gray-900 leading-loose font-medium text-justify">
+                                            工作经验：每日剪辑两条视频发布，保证账号的运营，提升公司热度。
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="reveal delay-200">
+                                    <div class="flex items-center mb-4">
+                                        <span class="text-base font-bold text-black w-24 tracking-widest">校外实践</span>
+                                        <span class="text-2xl font-black text-black tracking-wider mx-4">广州前程网络科技公司</span>
+                                        <span class="text-base font-bold text-gray-700 tracking-wide">新媒体运营</span>
+                                    </div>
+                                    <div class="flex items-stretch">
+                                        <div class="text-base text-gray-800 font-bold w-24 text-right pr-6 border-r-[3px] border-black flex flex-col justify-start pt-1 tracking-wider">
+                                            <span>2026.06</span><span class="text-sm my-1">-</span><span>2026.09</span>
+                                        </div>
+                                        <div class="flex-1 pl-6 text-base md:text-lg text-gray-900 leading-loose font-medium text-justify">
+                                            AI片段生成，核对画面、口播、字幕匹配度。视频切片拆分：把完整长视频、成片素材，按镜头、卖点、场景进行精准切片分割，输出标准化短片段素材，素材收集归档，基础数据整理，简单录入表格，做好数据收集登记。
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full bg-white text-black select-none border-t border-gray-100">
+                            <div class="max-w-6xl mx-auto w-full p-10 md:p-24 flex flex-col justify-start">
+                                <div class="flex items-center mb-8 reveal">
+                                    <svg class="w-8 h-8 mr-4 text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+                                    <h3 class="text-2xl font-black tracking-wider text-black">个人技能 <span class="text-sm font-bold tracking-normal uppercase ml-4 text-gray-700">/ SKILL</span></h3>
+                                </div>
+                                <div class="text-base md:text-lg text-gray-900 leading-loose mb-16 font-medium tracking-wide reveal delay-100">
+                                    <p class="mb-2">修图：PS接插件生图（banana/chatgpt）</p>
+                                    <p class="mb-2">排版：Canva, Figma, ID</p>
+                                    <p class="mb-2">数据整理：WPS, ai（gemini/workbuddy）</p>
+                                    <p class="mb-2">剪辑：CapCut, PR</p>
+                                    <p class="mt-6 leading-loose text-base text-gray-600">目前还在学习当今AI主流工具，网页设计和SVG交互正在学习阶段，希望在AI工具的帮助下提升工作质量和个人能力。</p>
+                                </div>
+                                <div class="w-full h-[3px] bg-black mb-12 line-grow"></div>
+                                <div class="flex items-center mb-8 reveal">
+                                    <svg class="w-8 h-8 mr-4 text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h5v7h7v9H6z"/></svg>
+                                    <h3 class="text-2xl font-black tracking-wider text-black">自我评价 <span class="text-sm font-bold tracking-normal uppercase ml-4 text-gray-700">/ SELF-EVALUATION</span></h3>
+                                </div>
+                                <div class="text-base md:text-lg text-gray-900 leading-loose font-medium tracking-wide text-justify reveal delay-100">
+                                    本人性格开朗，有较强的学习能力。通过社会工作的经历，具备较强的心理素质，有较强的抗压能力和洞察力。爱好摄影，户外登山徒步，当过三年高中班长，胆子比较大，个人认为我是一个能很快适应工作环境的人，能欣然接受未知的挑战。
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (currentIndex === 1) {
+                    // ================= VOL.02 排版设计：直接全展示，绝对居中无裁切 =================
+                    pageContainer.innerHTML = `
+                        ${generateHeroSection(data)}
+                        <div class="w-full bg-[#FAFAFA] text-[#1A1A1A] flex flex-col items-center pb-32 font-serif relative">
+                            
+                            <!-- 第一部分：排版设计展示（核心修复：使用 grid 完美居中并自适应屏幕，绝对不会被切掉边缘） -->
+                            <div class="w-full max-w-[95vw] md:max-w-7xl mt-16 md:mt-24 flex flex-col items-center">
+                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-8 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200 px-4">
+                                    <span class="font-bold text-gray-800">Showcase</span>
+                                    <span>Typography</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 w-full px-2 md:px-8 reveal items-start">
+                                    <img src="typeset1.png" alt="排版1" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
+                                    <img src="typeset2.png" alt="排版2" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] delay-100">
+                                    <img src="typeset3.png" alt="排版3" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] delay-200">
+                                    <img src="typeset4.png" alt="排版4" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] delay-300">
+                                </div>
+                            </div>
+
+                            <!-- 第二部分：微信公众号跳转卡片 -->
+                            <div class="w-full max-w-5xl mt-32 flex flex-col items-center px-6 reveal">
+                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-12 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200">
+                                    <span class="font-bold text-gray-800">Official Account</span>
+                                    <span>WeChat</span>
+                                </div>
+                                <h3 class="text-3xl font-black font-serif text-gray-900 mb-6">公众号图文排版</h3>
+                                <p class="text-gray-500 mb-10 text-sm tracking-wider font-sans">点击下方卡片前往微信体验完整动效与排版细节</p>
+                                
+                                <a href="https://mp.weixin.qq.com/s/z_S_V9oitqtmesdYH8iHaw" target="_blank" class="w-full max-w-3xl bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col md:flex-row group font-sans">
+                                    <div class="w-full md:w-1/3 bg-gray-50 flex items-center justify-center p-10 group-hover:bg-[#07C160]/10 transition-colors border-r border-gray-100">
+                                        <svg class="w-16 h-16 text-[#07C160]" fill="currentColor" viewBox="0 0 24 24"><path d="M8.5,13.5 C7.67157288,13.5 7,12.8284271 7,12 C7,11.1715729 7.67157288,10.5 8.5,10.5 C9.32842712,10.5 10,11.1715729 10,12 C10,12.8284271 9.32842712,13.5 8.5,13.5 Z M15.5,13.5 C14.6715729,13.5 14,12.8284271 14,12 C14,11.1715729 14.6715729,10.5 15.5,10.5 C16.3284271,10.5 17,11.1715729 17,12 C17,12.8284271 16.3284271,13.5 15.5,13.5 Z M12,22 C6.4771525,22 2,17.5228475 2,12 C2,6.4771525 6.4771525,2 12,2 C17.5228475,2 22,6.4771525 22,12 C22,17.5228475 17.5228475,22 12,22 Z"></path></svg>
+                                    </div>
+                                    <div class="p-8 flex flex-col justify-center flex-1">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-[#07C160] transition-colors">查看微信公众号排版原文 ↗</h4>
+                                        <p class="text-sm text-gray-500 leading-relaxed">在新标签页中打开微信公众号原文，体验最真实的图文排版交互与阅读节奏。</p>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- 第三部分：小红书账号运营模块 -->
+                            <div class="w-full max-w-5xl mt-32 flex flex-col items-center px-6 reveal delay-100">
+                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-12 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200">
+                                    <span class="font-bold text-gray-800">Social Media</span>
+                                    <span>Xiaohongshu</span>
+                                </div>
+                                <h3 class="text-3xl font-black font-serif text-gray-900 mb-4">小红书账号运营</h3>
+                                <p class="text-gray-500 mb-10 text-base tracking-wider font-sans">
+                                    账号 ID：<span class="font-bold text-[#FF2442] bg-[#FF2442]/10 px-3 py-1 rounded">42260982877</span>
+                                </p>
+                                
+                                <div class="w-full max-w-3xl bg-white border border-gray-200 rounded-xl shadow-lg p-4 transition-transform hover:scale-[1.01] duration-500">
+                                    <img src="xhs.png" alt="小红书运营展示" class="w-full h-auto rounded" onerror="this.src='data:image/svg+xml;utf8,<svg viewBox=%220 0 800 400%22 xmlns=%22http://www.w3.org/2000/svg%22><rect width=%22800%22 height=%22400%22 fill=%22%23f3f4f6%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2220%22 font-family=%22sans-serif%22>请将小红书截图命名为 xhs.png 并放入文件夹</text></svg>';">
+                                </div>
+                            </div>
+
+                        </div>
+                    `;
+                } else if (currentIndex === 2) {
+                    pageContainer.innerHTML = `
+                        ${generateHeroSection(data)}
+                        <div class="w-full bg-white text-[#1A1A1A] flex justify-center pb-24 font-serif relative">
+                            <div class="w-full max-w-[90vw] md:max-w-7xl mt-16 md:mt-24 flex flex-col relative z-10 px-4">
+                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-8 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
+                                    <span class="font-bold text-gray-800">Showcase</span>
+                                    <span>Brand Design</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 w-full reveal items-start">
+                                    <img src="brand1.png" alt="品牌包装设计1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01]">
+                                    <img src="brand2.png" alt="品牌包装设计2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] delay-100">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (currentIndex === 3) {
+                    pageContainer.innerHTML = `
+                        ${generateHeroSection(data)}
+                        <div class="w-full bg-white text-[#1A1A1A] flex justify-center pb-24 font-serif relative">
+                            <div class="w-full max-w-[90vw] md:max-w-7xl mt-16 md:mt-24 flex flex-col relative z-10 px-4">
+                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-8 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
+                                    <span class="font-bold text-gray-800">Showcase</span>
+                                    <span>Craft Design</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 w-full reveal items-start">
+                                    <img src="craft1.png" alt="文创设计1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01]">
+                                    <img src="craft2.png" alt="文创设计2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] delay-100">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (currentIndex === 4) {
+                    pageContainer.innerHTML = `
+                        ${generateHeroSection(data)}
+                        <div class="w-full bg-white text-[#1A1A1A] flex justify-center pb-24 font-serif relative">
+                            <div class="w-full max-w-[90vw] md:max-w-6xl mt-16 md:mt-24 flex flex-col relative z-10 px-4">
+                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-12 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
+                                    <span class="font-bold text-gray-800">Showcase</span>
+                                    <span>Character IP</span>
+                                </div>
+                                
+                                <div class="w-full mb-12 reveal">
+                                    <img src="ip1.png" alt="IP设计1" class="w-full h-auto block shadow-2xl">
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 w-full reveal items-start">
+                                    <img src="ip2.jpg" alt="IP设计2" class="w-full h-auto block shadow-2xl">
+                                    <img src="ip3.jpg" alt="IP设计3" class="w-full h-auto block shadow-2xl">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (currentIndex === 5) {
+                    // ================= VOL.06 短视频创作：核心修改放大视频 (7:5 黄金分割)，左右图文并排 =================
+                    pageContainer.innerHTML = `
+                        ${generateHeroSection(data)}
+                        <div class="w-full bg-[#0D0D0D] text-[#F7F6F2] pb-32 relative overflow-hidden">
+                            <!-- 加大容器 max-w-7xl 让视频拥有更大的展示空间 -->
+                            <div class="relative z-10 w-full max-w-[90vw] md:max-w-7xl mx-auto px-4 mt-16 md:mt-24 gap-24 flex flex-col">
+                                
+                                <!-- 视频1：左视频占大幅(8格)，右文字占小幅(4格) -->
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 w-full items-center reveal">
+                                    <div class="md:col-span-8 w-full aspect-video bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-1 md:order-1">
+                                        <video class="portfolio-video w-full h-full object-cover" src="video1.mp4" controls autoplay muted loop playsinline></video>
+                                    </div>
+                                    <div class="md:col-span-4 flex flex-col justify-center text-center md:text-left order-2 md:order-2 px-6">
+                                        <h3 class="text-2xl md:text-3xl font-black font-serif mb-4 text-white tracking-widest">华洋汽水广告</h3>
+                                        <div class="w-12 h-1 bg-white/30 mb-6 mx-auto md:mx-0"></div>
+                                        <p class="text-base md:text-lg text-gray-400 tracking-widest leading-loose">自拍自剪</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- 视频2：左文字占小幅(4格)，右视频占大幅(8格) -->
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 w-full items-center reveal delay-100">
+                                    <div class="md:col-span-4 flex flex-col justify-center text-center md:text-right order-2 md:order-1 px-6">
+                                        <h3 class="text-2xl md:text-3xl font-black font-serif mb-4 text-white tracking-widest">坳上古村宣传</h3>
+                                        <div class="w-12 h-1 bg-white/30 mb-6 mx-auto md:ml-auto md:mr-0"></div>
+                                        <p class="text-base md:text-lg text-gray-400 tracking-widest leading-loose">AI创作静态图片剪成</p>
+                                    </div>
+                                    <div class="md:col-span-8 w-full aspect-video bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-1 md:order-2">
+                                        <video class="portfolio-video w-full h-full object-cover" src="video2.mp4" controls autoplay muted loop playsinline></video>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    `;
+                } else if (currentIndex === 6) {
+                    pageContainer.innerHTML = `
+                        ${generateHeroSection(data)}
+                        <div class="w-full bg-white text-[#1A1A1A] flex justify-center pb-32 font-serif relative">
+                            <div class="w-full max-w-[90vw] md:max-w-7xl mt-16 md:mt-24 flex flex-col relative z-10 px-4">
+                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-16 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
+                                    <span class="font-bold text-gray-800">Showcase</span>
+                                    <span>Gallery</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 w-full reveal items-start mb-24 md:mb-32">
+                                    <img src="1.png" alt="长图1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01]">
+                                    <img src="2.png" alt="长图2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] delay-100">
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 w-full reveal items-start">
+                                    <img src="3.png" alt="长图3" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01]">
+                                    <img src="4.png" alt="长图4" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] delay-100">
+                                </div>
+                                
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                viewScroll.scrollTop = 0;
+                
+                if (currentIndex > 0) {
+                    rootStyle.setProperty('--bg-color', '#000000');
+                } else {
+                    rootStyle.setProperty('--bg-color', data.themeColor);
+                }
+                
+                const backBtn = document.getElementById('scroll-back-btn');
+                if (currentIndex > 0) {
+                    backBtn.classList.remove('text-gray-800', 'border-gray-800/30', 'bg-white/80');
+                    backBtn.classList.add('text-white', 'border-white/30', 'bg-black/40');
+                } else {
+                    backBtn.classList.remove('text-white', 'border-white/30', 'bg-black/40');
+                    backBtn.classList.add('text-gray-800', 'border-gray-800/30', 'bg-white/80');
+                }
+                
+                viewDetail.classList.replace('view-active', 'view-hidden');
+                viewScroll.classList.replace('view-hidden', 'view-active');
+                
+                setTimeout(() => {
+                    initScrollAnimations();
+                }, 100);
+                
+            }, 650); 
+        }
+
+        function initScrollAnimations() {
+            const observerOptions = {
+                root: document.getElementById('view-scroll'),
+                rootMargin: '0px 0px -10% 0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const revealElements = document.querySelectorAll('.reveal, .line-grow');
+            revealElements.forEach(el => observer.observe(el));
+        }
+
+        function handleBackToDetail() {
+            rootStyle.setProperty('--bg-color', bookData[currentIndex].themeColor);
+            
+            const backBtn = document.getElementById('scroll-back-btn');
+            backBtn.classList.remove('text-gray-800', 'border-gray-800/30', 'bg-white/80');
+            backBtn.classList.add('text-white', 'border-white/30', 'bg-black/40');
+            
+            viewScroll.classList.replace('view-active', 'view-hidden');
+            viewDetail.classList.replace('view-hidden', 'view-active');
+            
+            setTimeout(() => {
+                viewDetail.classList.remove('is-open');
+                
+                const videos = document.querySelectorAll('.portfolio-video');
+                videos.forEach(video => video.pause());
+            }, 50);
+        }
+
+        function handleBackToShelf() {
+            rootStyle.setProperty('--bg-color', '#F4F3ED');
+            viewDetail.classList.replace('view-active', 'view-hidden');
+            setTimeout(() => { viewShelf.classList.replace('view-hidden', 'view-active'); }, 400);
+        }
+    </script>
+</body>
+</html>
