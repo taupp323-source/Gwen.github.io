@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 终极修复：强制锁定为 1280px 桌面级视口，手机打开绝对不折叠，完美保持横排质感！ -->
+    <!-- 终极修复：强制锁定 1280px 宽度，手机打开绝对不折叠，完美保持横排质感！ -->
     <meta name="viewport" content="width=1280">
     <title>个人作品集 - The Personal Library</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,13 +11,12 @@
     <style>
         :root { --bg-color: #F4F3ED; }
 
-        /* 锁死底层页面，彻底杜绝全局滚动 */
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%; 
             overflow: hidden; position: fixed;
             background-color: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            transition: background-color 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: background-color 0.4s ease;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -30,15 +29,13 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* ================= 视图底层框架 ================= */
         .view-section {
             position: absolute; inset: 0; width: 100vw; height: 100vh;
-            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
         .view-active { opacity: 1; pointer-events: auto; transform: scale(1); z-index: 10; }
         .view-hidden { opacity: 0; pointer-events: none; transform: scale(0.96); z-index: -1; }
 
-        /* ================= 1. 首页 3D 书架 ================= */
         #shelf-header { height: 28vh; } 
         
         .shelf-container {
@@ -53,7 +50,6 @@
             perspective-origin: 50% -20%; 
             display: flex; 
             align-items: flex-end; 
-            /* 终极修复：去除了致命的 justify-content 导致的点不动 bug，回归最安全的居中方式 */
             margin: 0 auto;
             padding: 0 10vw 8vh 12vw; 
             gap: 2vw; 
@@ -64,7 +60,7 @@
 
         .book-3d {
             position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d;
-            transform: rotateY(-30deg) translateZ(0); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: rotateY(-30deg) translateZ(0); transition: transform 0.4s ease;
             cursor: pointer; flex-shrink: 0; box-shadow: -15px 25px 30px rgba(0,0,0,0.15);
         }
         .book-3d:hover { transform: rotateY(-10deg) translateZ(50px) translateY(-15px); }
@@ -75,30 +71,28 @@
         .face.top { width: var(--w); height: var(--d); background-color: #E8E6DF; transform-origin: top; transform: rotateX(-90deg); background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px); }
         .cover-decor { font-family: 'Playfair Display', serif; font-size: 5rem; color: rgba(255,255,255,0.04); writing-mode: vertical-rl; white-space: nowrap; font-weight: 900; }
 
-        /* ================= 2. 详情前导页引擎 ================= */
+        .tex-linen::after, .tex-noise::after, .tex-kraft::after, .tex-matte::after { content:''; position:absolute; inset:0; pointer-events:none; }
+        .tex-linen::after { background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); }
+        .tex-matte::after { background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08) 0%, transparent 60%); }
+
         .detail-wrapper { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; }
-        .book-area { width: 45vw; height: 100%; display: flex; justify-content: center; align-items: center; transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
-        .text-area { width: 40vw; transition: all 0.5s ease; opacity: 1; padding-right: 10vw; }
+        .book-area { width: 45vw; height: 100%; display: flex; justify-content: center; align-items: center; transition: all 0.5s ease; }
+        .text-area { width: 40vw; transition: all 0.3s ease; opacity: 1; padding-right: 10vw; }
         
         #detail-view.is-open .text-area { width: 0; opacity: 0; padding-right: 0; pointer-events: none; }
         #detail-view.is-open .book-area { width: 100vw; } 
         #detail-view.is-open .flip-book { transform: translateX(0) rotateY(0deg) rotateX(0deg) scale(1.15); }
 
         .flip-perspective { perspective: 3500px; display: flex; justify-content: center; align-items: center; }
-        .flip-book { position: relative; transform-style: preserve-3d; transform: translateX(0) rotateY(-15deg) rotateX(2deg); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; }
+        .flip-book { position: relative; transform-style: preserve-3d; transform: translateX(0) rotateY(-15deg) rotateX(2deg); transition: transform 0.5s ease; cursor: pointer; }
         
-        .click-hint { animation: pulse 2s infinite; }
+        .click-hint { animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
         .cover-big-title { font-family: 'Playfair Display', serif; font-size: 8vw; color: rgba(255,255,255,0.2); text-transform: uppercase; font-weight: 900; line-height: 0.9; pointer-events: none;}
         .handwritten-text { font-family: 'Noto Serif SC', serif; color: #334155; }
 
-        /* ================= 3. 长图流与动效设定 ================= */
         #view-scroll { overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-        
-        /* 终极修复：去除了所有隐身机制（opacity:0），让内容加载毫无阻碍，绝不再出现空白！ */
-        .hero-fade-in { animation: fadeIn 1s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .hero-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 10; }
         .hero-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
@@ -106,8 +100,11 @@
     </style>
 </head>
 <body>
+    <!-- 缓存强力验证标签：如果你看到了这个红标，说明代码更新成功了！ -->
+    <div class="fixed top-4 right-4 bg-red-600 text-white font-black px-6 py-2 rounded-full z-[9999] shadow-2xl pointer-events-none tracking-widest text-lg">
+        V10 终极横屏版
+    </div>
 
-    <!-- ================= 唯一保留的层：首页书架 ================= -->
     <div id="view-shelf" class="view-section view-active flex flex-col justify-between">
         <header id="shelf-header" class="w-full flex flex-col items-center justify-center shrink-0 z-10 pointer-events-none">
             <p class="text-xs tracking-[0.4em] text-gray-500 mb-4 font-serif uppercase mt-8">Chapter 1</p>
@@ -118,38 +115,38 @@
 
         <div class="shelf-container">
             <div class="perspective-scene">
-                <!-- 确保高度恰当，绝对不挡标题 -->
-                <div onclick="openDetailView(0)" class="book-3d shadow-xl" style="--w: 7vw; --h: 60vh; --d: 25vw; --bg: #2B3A4A; --side-bg: #1F2A36; --text-color: #FFFFFF;">
+                <!-- 双重绑定点击事件，防止移动端失效 -->
+                <div onclick="openDetailView(0)" ontouchstart="openDetailView(0)" class="book-3d shadow-xl" style="--w: 7vw; --h: 60vh; --d: 25vw; --bg: #2B3A4A; --side-bg: #1F2A36; --text-color: #FFFFFF;">
                     <div class="face front tex-linen"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.01</span><span class="spine-text-sans text-4xl uppercase font-black">ABOUT ME</span></div>
                     <div class="face right tex-linen"><span class="cover-decor text-white/10">ABOUT</span></div><div class="face top"></div>
                 </div>
 
-                <div onclick="openDetailView(1)" class="book-3d shadow-2xl" style="--w: 6.5vw; --h: 46vh; --d: 24vw; --bg: #8B3A3A; --side-bg: #6B2C2C; --text-color: #F7F6F2;">
+                <div onclick="openDetailView(1)" ontouchstart="openDetailView(1)" class="book-3d shadow-2xl" style="--w: 6.5vw; --h: 46vh; --d: 24vw; --bg: #8B3A3A; --side-bg: #6B2C2C; --text-color: #F7F6F2;">
                     <div class="face front tex-noise"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.02</span><span class="spine-text-zh text-2xl font-bold">排版设计</span></div>
                     <div class="face right tex-noise"><span class="cover-decor text-white/10">TYPO</span></div><div class="face top"></div>
                 </div>
 
-                <div onclick="openDetailView(2)" class="book-3d shadow-2xl" style="--w: 8vw; --h: 53vh; --d: 26vw; --bg: #1A1A1A; --side-bg: #111111; --text-color: #F7F6F2;">
+                <div onclick="openDetailView(2)" ontouchstart="openDetailView(2)" class="book-3d shadow-2xl" style="--w: 8vw; --h: 53vh; --d: 26vw; --bg: #1A1A1A; --side-bg: #111111; --text-color: #F7F6F2;">
                     <div class="face front tex-matte"><span class="absolute top-6 text-sm opacity-60 font-serif">VOL.03</span><span class="spine-text-zh text-3xl font-black">品牌包装设计</span></div>
                     <div class="face right tex-matte"><span class="cover-decor text-white/5">BRAND</span></div><div class="face top"></div>
                 </div>
 
-                <div onclick="openDetailView(3)" class="book-3d shadow-xl" style="--w: 6vw; --h: 41vh; --d: 23vw; --bg: #D48E45; --side-bg: #B07435; --text-color: #1A1A1A;">
+                <div onclick="openDetailView(3)" ontouchstart="openDetailView(3)" class="book-3d shadow-xl" style="--w: 6vw; --h: 41vh; --d: 23vw; --bg: #D48E45; --side-bg: #B07435; --text-color: #1A1A1A;">
                     <div class="face front tex-kraft"><span class="absolute top-6 text-xs opacity-60 font-serif">VOL.04</span><span class="spine-text-zh text-2xl font-bold">文创设计</span></div>
                     <div class="face right tex-kraft"><span class="cover-decor text-black/10">CRAFT</span></div><div class="face top"></div>
                 </div>
                 
-                <div onclick="openDetailView(4)" class="book-3d shadow-xl" style="--w: 5vw; --h: 48vh; --d: 21vw; --bg: #C19A5C; --side-bg: #A37F46; --text-color: #FFFFFF;">
+                <div onclick="openDetailView(4)" ontouchstart="openDetailView(4)" class="book-3d shadow-xl" style="--w: 5vw; --h: 48vh; --d: 21vw; --bg: #C19A5C; --side-bg: #A37F46; --text-color: #FFFFFF;">
                     <div class="face front tex-linen"><span class="absolute top-6 text-xs opacity-60 font-serif">VOL.05</span><span class="spine-text-zh text-xl font-bold">IP形象设计</span></div>
                     <div class="face right tex-linen"><span class="cover-decor text-black/10">CHARA</span></div><div class="face top"></div>
                 </div>
                 
-                <div onclick="openDetailView(5)" class="book-3d shadow-md" style="--w: 6.5vw; --h: 38vh; --d: 23vw; --bg: #739E9E; --side-bg: #5A7D7D; --text-color: #FFFFFF;">
+                <div onclick="openDetailView(5)" ontouchstart="openDetailView(5)" class="book-3d shadow-md" style="--w: 6.5vw; --h: 38vh; --d: 23vw; --bg: #739E9E; --side-bg: #5A7D7D; --text-color: #FFFFFF;">
                     <div class="face front tex-noise"><span class="absolute top-6 text-xs opacity-60 font-serif">VOL.06</span><span class="spine-text-zh text-2xl font-bold">短视频创作</span></div>
                     <div class="face right tex-noise"><span class="cover-decor text-white/10">MOTION</span></div><div class="face top"></div>
                 </div>
 
-                <div onclick="openDetailView(6)" class="book-3d shadow-md" style="--w: 6.5vw; --h: 55vh; --d: 24vw; --bg: #828587; --side-bg: #686A6C; --text-color: #F7F6F2;">
+                <div onclick="openDetailView(6)" ontouchstart="openDetailView(6)" class="book-3d shadow-md" style="--w: 6.5vw; --h: 55vh; --d: 24vw; --bg: #828587; --side-bg: #686A6C; --text-color: #F7F6F2;">
                     <div class="face front tex-matte"><span class="absolute top-6 text-xs opacity-50 font-serif">VOL.07</span><span class="spine-text-zh text-3xl font-bold">电商美工</span></div>
                     <div class="face right tex-matte"><span class="cover-decor text-white/10">STORE</span></div><div class="face top"></div>
                 </div>
@@ -157,17 +154,15 @@
         </div>
     </div>
 
-    <!-- ================= 唯一保留的层：中间前导页 ================= -->
     <div id="detail-view" class="view-section view-hidden text-white">
-        <button onclick="handleBackToShelf()" class="absolute top-10 left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-opacity z-50 border-b border-white/30 pb-1">
+        <button onclick="handleBackToShelf()" ontouchstart="handleBackToShelf()" class="absolute top-10 left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-opacity z-50 border-b border-white/30 pb-1">
             ← Back
         </button>
 
         <div class="detail-wrapper">
             <div class="book-area">
                 <div class="flip-perspective">
-                    <div class="flip-book" id="active-cover" onclick="openScrollContent()">
-                        <!-- 封面由JS动态注入 -->
+                    <div class="flip-book" id="active-cover" onclick="openScrollContent()" ontouchstart="openScrollContent()">
                     </div>
                 </div>
             </div>
@@ -179,33 +174,27 @@
                 </div>
                 <h1 class="text-6xl font-black mb-6 leading-tight" id="detail-title">标题</h1>
                 <h2 class="text-xl italic mb-10 opacity-80" id="detail-subtitle">副标题</h2>
-                <p class="text-base leading-relaxed opacity-70 mb-12 max-w-md text-gray-300" id="detail-summary">
-                    内容摘要
-                </p>
+                <p class="text-base leading-relaxed opacity-70 mb-12 max-w-md text-gray-300" id="detail-summary">内容摘要</p>
                 <div class="border border-white/30 py-4 px-6 uppercase text-xs tracking-widest cursor-pointer hover:bg-white/10 transition-colors max-w-sm flex justify-between items-center" onclick="openScrollContent()">
-                    <span>Click Book to Open</span>
-                    <span class="text-lg">📖</span>
+                    <span>Click Book to Open</span><span class="text-lg">📖</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ================= 唯一保留的层：长图流阅览页 ================= -->
     <div id="view-scroll" class="view-section view-hidden bg-transparent text-white hide-scrollbar">
         <div class="sticky top-0 z-[100] w-full h-0">
-            <button onclick="handleBackToDetail()" id="scroll-back-btn" class="absolute top-10 left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-all border-b border-white/30 pb-1 bg-black/40 p-2 rounded backdrop-blur-sm shadow-lg text-white">
+            <button onclick="handleBackToDetail()" ontouchstart="handleBackToDetail()" class="absolute top-10 left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-all border-b border-white/30 pb-1 bg-black/40 p-2 rounded backdrop-blur-sm shadow-lg text-white">
                 ← Back
             </button>
         </div>
 
         <div class="w-full flex flex-col items-center">
             <div id="scroll-pages-container" class="w-full flex flex-col items-center w-full">
-                <!-- 内容由JS动态注入 -->
             </div>
         </div>
     </div>
 
-    <!-- ================= 逻辑脚本 ================= -->
     <script>
         const bookData = [
             { vol: "VOL.01", title: "About Me", sub: "个人简介", desc: "你好，我是蒲慧玟。我相信优秀的设计与运营不仅仅是视觉的点缀，更是信息逻辑的重构与传播维度的拓展。", themeColor: "#1B242C", coverColor: "#2B3A4A", texClass: "tex-linen", short: "ABOUT", bgImg: "", cw: "28vw", ch: "76vh" },
@@ -225,8 +214,16 @@
         const pageContainer = document.getElementById('scroll-pages-container');
         
         let currentIndex = 0;
+        let isTransitioning = false;
+
+        // 【终极排错系统】如果找不到图片/视频，它会弹出一个巨大的红框告诉你原因！
+        const errHtml = (name) => `onerror="this.outerHTML='<div class=&quot;w-full min-h-[400px] flex flex-col items-center justify-center border-4 border-red-500 bg-red-50 p-10 text-center rounded-xl&quot;><span class=&quot;text-red-600 text-4xl font-black mb-4&quot;>🚨 找不到文件：${name}</span><div class=&quot;text-gray-700 text-xl font-medium leading-loose text-left bg-white p-6 rounded shadow-inner mt-4&quot;>可能的原因：<br>1. GitHub 仓库里<strong class=&quot;text-black&quot;>没上传</strong>这个文件<br>2. <strong class=&quot;text-black&quot;>名字大小写写错了</strong>（代码里是小写，请检查你的图片名）<br>3. 视频<strong class=&quot;text-black&quot;>超过了 25MB</strong></div></div>'"`;
 
         function openDetailView(index) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            setTimeout(() => isTransitioning = false, 500);
+
             currentIndex = index;
             const data = bookData[index];
             
@@ -237,30 +234,22 @@
             
             activeCover.style.width = data.cw;
             activeCover.style.height = data.ch;
-            activeCover.innerHTML = `
-                <div class="${data.texClass} w-full h-full relative overflow-hidden" style="background-color: ${data.coverColor}; border-radius: 2px 6px 6px 2px; box-shadow: 15px 15px 30px rgba(0,0,0,0.3);">
-                    <div class="absolute inset-0 flex flex-col justify-center items-center">
-                        <div class="cover-big-title text-center w-full">${data.short}</div>
-                        <div class="absolute bottom-6 right-6 click-hint text-white/70 text-xs tracking-widest uppercase font-serif">Click to Read →</div>
-                    </div>
-                </div>
-            `;
+            activeCover.innerHTML = `<div class="${data.texClass} w-full h-full relative overflow-hidden" style="background-color: ${data.coverColor}; border-radius: 2px 6px 6px 2px; box-shadow: 15px 15px 30px rgba(0,0,0,0.3);"><div class="absolute inset-0 flex flex-col justify-center items-center"><div class="cover-big-title text-center w-full">${data.short}</div><div class="absolute bottom-6 right-6 click-hint text-white/70 text-xs tracking-widest uppercase font-serif">Click to Read →</div></div></div>`;
             
             rootStyle.setProperty('--bg-color', data.themeColor);
             viewDetail.classList.remove('is-open'); 
             
             viewShelf.classList.replace('view-active', 'view-hidden');
-            setTimeout(() => { viewDetail.classList.replace('view-hidden', 'view-active'); }, 400);
+            setTimeout(() => { viewDetail.classList.replace('view-hidden', 'view-active'); }, 50);
         }
 
         function generateHeroSection(data) {
             return `
                 <div class="w-full min-h-[85vh] bg-[#0D0D0D] flex items-center justify-center relative overflow-hidden px-8">
-                    <!-- 加上背景色，图片加载出来前显示高级黑灰色 -->
-                    <img loading="lazy" src="${data.bgImg}" alt="Background" class="hero-bg-img bg-[#1a1a1a]">
+                    <img loading="lazy" src="${data.bgImg}" alt="Background" class="hero-bg-img bg-[#1a1a1a]" ${errHtml(data.bgImg)}>
                     <div class="hero-overlay"></div>
                     
-                    <div class="max-w-4xl w-full flex flex-col items-center text-center hero-content hero-fade-in">
+                    <div class="max-w-4xl w-full flex flex-col items-center text-center hero-content">
                         <h1 class="text-7xl font-serif font-black mb-4 tracking-wider">${data.title}</h1>
                         <p class="text-sm text-gray-300 tracking-[0.3em] uppercase mb-8 opacity-80">${data.short} PROJECT</p>
                         <p class="text-xl font-bold mb-6 tracking-wider opacity-90">${data.sub}</p>
@@ -276,6 +265,10 @@
         }
 
         function openScrollContent() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            setTimeout(() => isTransitioning = false, 500);
+
             viewDetail.classList.add('is-open');
             
             setTimeout(() => {
@@ -286,21 +279,20 @@
                         <div class="w-full min-h-[90vh] py-20 flex flex-col items-center justify-center bg-[#E5A96A] relative overflow-hidden">
                             <div class="text-[20rem] font-serif font-bold text-[#A3662A] opacity-20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none whitespace-nowrap z-0">ABOUT ME</div>
                             
-                            <!-- 终极修复：去除了所有的 reveal 隐藏属性，让图片直接无条件显示 -->
                             <div class="relative z-10 w-full max-w-5xl px-6 flex flex-row items-center justify-center gap-8">
                                 <div class="w-1/3 transform -rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
                                     <div class="bg-white p-3 pb-10 shadow-xl border border-gray-100 rounded-sm">
-                                        <img loading="lazy" src="33973da6beab4392e93e2edca6dd34bf.jpg" alt="风景照" class="w-full aspect-[3/4] object-cover rounded-sm bg-gray-200">
+                                        <img loading="lazy" src="33973da6beab4392e93e2edca6dd34bf.jpg" alt="风景照" class="w-full aspect-[3/4] object-cover rounded-sm bg-gray-200" ${errHtml('33973da6beab4392e93e2edca6dd34bf.jpg')}>
                                     </div>
                                 </div>
                                 <div class="w-1/3 z-20 transform hover:scale-105 transition-all duration-500">
                                     <div class="bg-white p-4 pb-12 shadow-2xl border border-gray-100 rounded-sm">
-                                        <img loading="lazy" src="cc6c6feb2ed5ddd4f9b3d89278a24f30.jpg" alt="证件照" class="w-full aspect-[3/4] object-cover rounded-sm bg-gray-200">
+                                        <img loading="lazy" src="cc6c6feb2ed5ddd4f9b3d89278a24f30.jpg" alt="证件照" class="w-full aspect-[3/4] object-cover rounded-sm bg-gray-200" ${errHtml('cc6c6feb2ed5ddd4f9b3d89278a24f30.jpg')}>
                                     </div>
                                 </div>
                                 <div class="w-1/3 transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
                                     <div class="bg-white p-3 pb-10 shadow-xl border border-gray-100 rounded-sm">
-                                        <img loading="lazy" src="d30a334d48491fe5acc278013d6bb293.jpg" alt="生活照" class="w-full aspect-[3/4] object-cover rounded-sm bg-gray-200">
+                                        <img loading="lazy" src="d30a334d48491fe5acc278013d6bb293.jpg" alt="生活照" class="w-full aspect-[3/4] object-cover rounded-sm bg-gray-200" ${errHtml('d30a334d48491fe5acc278013d6bb293.jpg')}>
                                     </div>
                                 </div>
                             </div>
@@ -411,7 +403,6 @@
                         </div>
                     `;
                 } else if (currentIndex === 1) {
-                    // ================= VOL.02 排版设计：保留精美横向滑动 =================
                     pageContainer.innerHTML = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-[#FAFAFA] text-[#1A1A1A] flex flex-col items-center pb-32 font-serif relative">
@@ -424,16 +415,16 @@
                                 
                                 <div class="w-full flex overflow-x-auto gap-12 pb-12 items-start hide-scrollbar snap-x snap-mandatory px-[15vw]">
                                     <div class="flex-none w-[450px] snap-center">
-                                        <img loading="lazy" src="typeset1.png" alt="排版1" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] bg-gray-200 min-h-[600px]">
+                                        <img loading="lazy" src="typeset1.png" alt="排版1" class="w-full h-auto shadow-xl bg-gray-200 min-h-[600px]" ${errHtml('typeset1.png')}>
                                     </div>
                                     <div class="flex-none w-[450px] snap-center">
-                                        <img loading="lazy" src="typeset2.png" alt="排版2" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] bg-gray-200 min-h-[600px]">
+                                        <img loading="lazy" src="typeset2.png" alt="排版2" class="w-full h-auto shadow-xl bg-gray-200 min-h-[600px]" ${errHtml('typeset2.png')}>
                                     </div>
                                     <div class="flex-none w-[450px] snap-center">
-                                        <img loading="lazy" src="typeset3.png" alt="排版3" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] bg-gray-200 min-h-[600px]">
+                                        <img loading="lazy" src="typeset3.png" alt="排版3" class="w-full h-auto shadow-xl bg-gray-200 min-h-[600px]" ${errHtml('typeset3.png')}>
                                     </div>
                                     <div class="flex-none w-[450px] snap-center">
-                                        <img loading="lazy" src="typeset4.png" alt="排版4" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02] bg-gray-200 min-h-[600px]">
+                                        <img loading="lazy" src="typeset4.png" alt="排版4" class="w-full h-auto shadow-xl bg-gray-200 min-h-[600px]" ${errHtml('typeset4.png')}>
                                     </div>
                                 </div>
                                 
@@ -471,12 +462,8 @@
                                     账号 ID：<span class="font-bold text-[#FF2442] bg-[#FF2442]/10 px-3 py-1 rounded">42260982877</span>
                                 </p>
                                 
-                                <!-- 终极修复：去除了导致解析错误的复杂嵌套语句，采用最安全的报错回调机制 -->
-                                <div class="w-full max-w-3xl bg-white border border-gray-200 rounded-xl shadow-lg p-4 transition-transform hover:scale-[1.01] duration-500 text-center">
-                                    <img loading="lazy" src="xhs.png" alt="小红书运营展示" class="w-full h-auto rounded bg-gray-50" onerror="this.style.display='none'; document.getElementById('xhs-err').style.display='block';">
-                                    <div id="xhs-err" style="display:none;" class="py-20 text-gray-400 bg-gray-50 rounded text-lg font-sans">
-                                        请将小红书截图命名为 <span class="text-[#FF2442] font-bold">xhs.png</span> 并放入文件夹内
-                                    </div>
+                                <div class="w-full max-w-3xl bg-white border border-gray-200 rounded-xl shadow-lg p-4 transition-transform hover:scale-[1.01] duration-500 min-h-[300px] flex items-center justify-center bg-gray-50">
+                                    <img src="xhs.png" alt="小红书运营展示" class="w-full h-auto rounded" ${errHtml('xhs.png')}>
                                 </div>
                             </div>
 
@@ -491,10 +478,9 @@
                                     <span class="font-bold text-gray-800">Showcase</span>
                                     <span>Brand Design</span>
                                 </div>
-                                <!-- 无论如何强制双排 -->
                                 <div class="grid grid-cols-2 gap-16 w-full items-start">
-                                    <img loading="lazy" src="brand1.png" alt="品牌包装设计1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] bg-gray-100 min-h-[600px]">
-                                    <img loading="lazy" src="brand2.png" alt="品牌包装设计2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] bg-gray-100 min-h-[600px]">
+                                    <img loading="lazy" src="brand1.png" alt="品牌包装设计1" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[600px]" ${errHtml('brand1.png')}>
+                                    <img loading="lazy" src="brand2.png" alt="品牌包装设计2" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[600px]" ${errHtml('brand2.png')}>
                                 </div>
                             </div>
                         </div>
@@ -509,8 +495,8 @@
                                     <span>Craft Design</span>
                                 </div>
                                 <div class="grid grid-cols-2 gap-16 w-full items-start">
-                                    <img loading="lazy" src="craft1.png" alt="文创设计1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] bg-gray-100 min-h-[600px]">
-                                    <img loading="lazy" src="craft2.png" alt="文创设计2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] bg-gray-100 min-h-[600px]">
+                                    <img loading="lazy" src="craft1.png" alt="文创设计1" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[600px]" ${errHtml('craft1.png')}>
+                                    <img loading="lazy" src="craft2.png" alt="文创设计2" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[600px]" ${errHtml('craft2.png')}>
                                 </div>
                             </div>
                         </div>
@@ -526,27 +512,25 @@
                                 </div>
                                 
                                 <div class="w-full mb-12">
-                                    <img loading="lazy" src="ip1.png" alt="IP设计1" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[400px]">
+                                    <img loading="lazy" src="ip1.png" alt="IP设计1" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[400px]" ${errHtml('ip1.png')}>
                                 </div>
                                 
                                 <div class="grid grid-cols-2 gap-12 w-full items-start">
-                                    <img loading="lazy" src="ip2.jpg" alt="IP设计2" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[400px]">
-                                    <img loading="lazy" src="ip3.jpg" alt="IP设计3" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[400px]">
+                                    <img loading="lazy" src="ip2.jpg" alt="IP设计2" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[400px]" ${errHtml('ip2.jpg')}>
+                                    <img loading="lazy" src="ip3.jpg" alt="IP设计3" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[400px]" ${errHtml('ip3.jpg')}>
                                 </div>
                             </div>
                         </div>
                     `;
                 } else if (currentIndex === 5) {
-                    // ================= VOL.06 短视频创作：75% 极度震撼超大画幅展示 =================
                     pageContainer.innerHTML = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-[#0D0D0D] text-[#F7F6F2] pb-32 relative overflow-hidden">
                             <div class="relative z-10 w-full max-w-7xl mx-auto mt-24 gap-24 flex flex-col px-4">
                                 
-                                <!-- 占 9 格的超大视频和占 3 格的侧边文字 -->
                                 <div class="grid grid-cols-12 gap-8 w-full items-center">
                                     <div class="col-span-9 w-full bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-1 min-h-[500px]">
-                                        <video class="w-full h-auto block" src="video1.mp4" controls playsinline></video>
+                                        <video class="w-full h-auto block" src="video1.mp4" controls playsinline ${errHtml('video1.mp4')}></video>
                                     </div>
                                     <div class="col-span-3 flex flex-col justify-center text-left order-2 px-6">
                                         <h3 class="text-3xl font-black font-serif mb-4 text-white tracking-widest">华洋汽水广告</h3>
@@ -562,7 +546,7 @@
                                         <p class="text-lg text-gray-400 tracking-widest leading-loose">AI创作静态图片剪成</p>
                                     </div>
                                     <div class="col-span-9 w-full bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-2 min-h-[500px]">
-                                        <video class="w-full h-auto block" src="video2.mp4" controls playsinline></video>
+                                        <video class="w-full h-auto block" src="video2.mp4" controls playsinline ${errHtml('video2.mp4')}></video>
                                     </div>
                                 </div>
                                 
@@ -580,13 +564,13 @@
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-12 w-full items-start mb-32">
-                                    <img loading="lazy" src="1.png" alt="长图1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] bg-gray-100 min-h-[600px]">
-                                    <img loading="lazy" src="2.png" alt="长图2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] bg-gray-100 min-h-[600px]">
+                                    <img loading="lazy" src="1.png" alt="长图1" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[600px]" ${errHtml('1.png')}>
+                                    <img loading="lazy" src="2.png" alt="长图2" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[600px]" ${errHtml('2.png')}>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-12 w-full items-start">
-                                    <img loading="lazy" src="3.png" alt="长图3" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] bg-gray-100 min-h-[600px]">
-                                    <img loading="lazy" src="4.png" alt="长图4" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] bg-gray-100 min-h-[600px]">
+                                    <img loading="lazy" src="3.png" alt="长图3" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[600px]" ${errHtml('3.png')}>
+                                    <img loading="lazy" src="4.png" alt="长图4" class="w-full h-auto block shadow-2xl bg-gray-100 min-h-[600px]" ${errHtml('4.png')}>
                                 </div>
                                 
                             </div>
@@ -614,10 +598,14 @@
                 viewDetail.classList.replace('view-active', 'view-hidden');
                 viewScroll.classList.replace('view-hidden', 'view-active');
                 
-            }, 650); 
+            }, 300); 
         }
 
         function handleBackToDetail() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            setTimeout(() => isTransitioning = false, 500);
+
             rootStyle.setProperty('--bg-color', bookData[currentIndex].themeColor);
             
             const backBtn = document.getElementById('scroll-back-btn');
@@ -630,7 +618,6 @@
             setTimeout(() => {
                 viewDetail.classList.remove('is-open');
                 
-                // 返回时自动停止播放所有视频
                 const videos = document.querySelectorAll('video');
                 videos.forEach(video => {
                     video.pause();
@@ -640,9 +627,13 @@
         }
 
         function handleBackToShelf() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            setTimeout(() => isTransitioning = false, 500);
+
             rootStyle.setProperty('--bg-color', '#F4F3ED');
             viewDetail.classList.replace('view-active', 'view-hidden');
-            setTimeout(() => { viewShelf.classList.replace('view-hidden', 'view-active'); }, 400);
+            setTimeout(() => { viewShelf.classList.replace('view-hidden', 'view-active'); }, 200);
         }
     </script>
 </body>
