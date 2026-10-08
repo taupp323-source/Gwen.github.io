@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1280">
     <title>个人作品集 - The Personal Library</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
@@ -55,10 +55,6 @@
             transform: translateX(-3vw);
         }
 
-        @media (max-width: 768px) {
-            .perspective-scene { justify-content: flex-start; padding: 0 10vw 8vh 10vw; transform: translateX(0); }
-        }
-
         .book-3d {
             position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d;
             transform: rotateY(-30deg) translateZ(0); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
@@ -95,14 +91,6 @@
         .handwritten-text { font-family: 'Noto Serif SC', serif; color: #334155; }
 
         #view-scroll { overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
-        .animate-float { animation: float-photo 6s ease-in-out infinite; }
-        @keyframes float-photo { 0% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(-1deg); } 100% { transform: translateY(0px) rotate(-2deg); } }
-
-        .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .delay-100 { transition-delay: 100ms; }
-        .delay-200 { transition-delay: 200ms; }
-        .delay-300 { transition-delay: 300ms; }
 
         .hero-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 10; }
         .hero-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
@@ -114,7 +102,7 @@
     <div id="view-shelf" class="view-section view-active flex flex-col justify-between">
         <header id="shelf-header" class="w-full flex flex-col items-center justify-center shrink-0 z-10 pointer-events-none">
             <p class="text-xs tracking-[0.4em] text-gray-500 mb-4 font-serif uppercase mt-8">Chapter 1</p>
-            <h1 class="hero-title text-6xl md:text-[7rem] font-black text-center text-[#1A1A1A]">
+            <h1 class="hero-title text-[7rem] font-black text-center text-[#1A1A1A]">
                 WELCOME TO<br>MY SPACE
             </h1>
         </header>
@@ -160,7 +148,7 @@
     </div>
 
     <div id="detail-view" class="view-section view-hidden text-white">
-        <button onclick="handleBackToShelf()" class="absolute top-8 left-8 md:top-10 md:left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-opacity z-50 border-b border-white/30 pb-1">
+        <button onclick="handleBackToShelf()" class="absolute top-10 left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-opacity z-50 border-b border-white/30 pb-1">
             ← Back
         </button>
 
@@ -177,9 +165,9 @@
                     <span>Selected Collection</span>
                     <span id="detail-vol">VOL.03</span>
                 </div>
-                <h1 class="text-5xl lg:text-6xl font-black mb-6 leading-tight" id="detail-title">标题</h1>
-                <h2 class="text-xl italic mb-10 opacity-80" id="detail-subtitle">副标题</h2>
-                <p class="text-sm md:text-base leading-relaxed opacity-70 mb-12 max-w-md text-gray-300" id="detail-summary">
+                <h1 class="text-6xl font-black mb-6 leading-tight" id="detail-title">品牌包装设计</h1>
+                <h2 class="text-xl italic mb-10 opacity-80" id="detail-subtitle">克制与高级感的视觉传达</h2>
+                <p class="text-base leading-relaxed opacity-70 mb-12 max-w-md text-gray-300" id="detail-summary">
                     内容摘要
                 </p>
                 <div class="border border-white/30 py-4 px-6 uppercase text-xs tracking-widest cursor-pointer hover:bg-white/10 transition-colors max-w-sm flex justify-between items-center" onclick="openScrollContent()">
@@ -192,7 +180,7 @@
 
     <div id="view-scroll" class="view-section view-hidden bg-transparent text-white hide-scrollbar">
         <div class="sticky top-0 z-[100] w-full h-0">
-            <button onclick="handleBackToDetail()" id="scroll-back-btn" class="absolute top-8 left-8 md:top-10 md:left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-all border-b border-white/30 pb-1 bg-black/40 p-2 rounded backdrop-blur-sm shadow-lg text-white">
+            <button onclick="handleBackToDetail()" id="scroll-back-btn" class="absolute top-10 left-12 text-xs tracking-widest font-serif uppercase flex items-center gap-2 hover:opacity-50 transition-all border-b border-white/30 pb-1 bg-black/40 p-2 rounded backdrop-blur-sm shadow-lg text-white">
                 ← Back
             </button>
         </div>
@@ -244,24 +232,27 @@
             `;
             
             rootStyle.setProperty('--bg-color', data.themeColor);
-            viewDetail.classList.remove('is-open'); 
             
-            viewShelf.classList.replace('view-active', 'view-hidden');
-            setTimeout(() => { viewDetail.classList.replace('view-hidden', 'view-active'); }, 400);
+            viewShelf.classList.remove('view-active');
+            viewShelf.classList.add('view-hidden');
+            
+            setTimeout(() => { 
+                viewDetail.classList.remove('view-hidden');
+                viewDetail.classList.add('view-active'); 
+            }, 400);
         }
 
         function generateHeroSection(data) {
             return `
-                <div class="w-full min-h-[70vh] md:min-h-[85vh] bg-[#0D0D0D] flex items-center justify-center relative overflow-hidden px-8">
-                    <!-- 开启图片的懒加载机制提速 -->
-                    <img loading="lazy" decoding="async" src="${data.bgImg}" alt="Background" class="hero-bg-img">
+                <div class="w-full min-h-[85vh] bg-[#0D0D0D] flex items-center justify-center relative overflow-hidden px-8">
+                    <img loading="lazy" src="${data.bgImg}" alt="Background" class="hero-bg-img">
                     <div class="hero-overlay"></div>
                     
-                    <div class="max-w-4xl w-full flex flex-col items-center text-center hero-content reveal">
-                        <h1 class="text-5xl md:text-7xl font-serif font-black mb-4 tracking-wider">${data.title}</h1>
-                        <p class="text-xs md:text-sm text-gray-300 tracking-[0.3em] uppercase mb-8 opacity-80">${data.short} PROJECT</p>
-                        <p class="text-base md:text-xl font-bold mb-6 tracking-wider opacity-90">${data.sub}</p>
-                        <p class="text-sm md:text-base text-gray-300 leading-loose max-w-2xl opacity-80">${data.desc}</p>
+                    <div class="max-w-4xl w-full flex flex-col items-center text-center hero-content">
+                        <h1 class="text-7xl font-serif font-black mb-4 tracking-wider">${data.title}</h1>
+                        <p class="text-sm text-gray-300 tracking-[0.3em] uppercase mb-8 opacity-80">${data.short} PROJECT</p>
+                        <p class="text-xl font-bold mb-6 tracking-wider opacity-90">${data.sub}</p>
+                        <p class="text-base text-gray-300 leading-loose max-w-2xl opacity-80">${data.desc}</p>
                     </div>
                     
                     <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center opacity-50 animate-bounce hero-content">
@@ -277,66 +268,64 @@
             
             setTimeout(() => {
                 const data = bookData[currentIndex];
+                let contentHtml = '';
                 
                 if (currentIndex === 0) {
-                    /* 手机端依然横向并排的图片展示 */
-                    pageContainer.innerHTML = `
+                    contentHtml = `
                         <div class="w-full min-h-[90vh] py-20 flex flex-col items-center justify-center bg-[#E5A96A] relative overflow-hidden">
-                            <div class="text-[12rem] md:text-[20rem] font-serif font-bold text-[#A3662A] opacity-20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none whitespace-nowrap z-0">ABOUT ME</div>
-                            
-                            <!-- 核心提速修复：加上 lazy 懒加载，并强制手机端横排 (flex-row) -->
-                            <div class="relative z-10 w-full max-w-5xl px-2 md:px-6 flex flex-row items-center justify-center gap-3 md:gap-8 reveal">
-                                <div class="w-1/3 transform md:-rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
-                                    <div class="bg-white p-2 pb-6 md:p-3 md:pb-10 shadow-xl border border-gray-100 rounded-sm">
-                                        <img loading="lazy" decoding="async" src="33973da6beab4392e93e2edca6dd34bf.jpg" alt="风景照" class="w-full aspect-[3/4] object-cover rounded-sm">
+                            <div class="text-[20rem] font-serif font-bold text-[#A3662A] opacity-20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none whitespace-nowrap z-0">ABOUT ME</div>
+                            <div class="relative z-10 w-full max-w-5xl px-6 flex flex-row items-center justify-center gap-8">
+                                <div class="w-1/3 transform -rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
+                                    <div class="bg-white p-3 pb-10 shadow-xl border border-gray-100 rounded-sm">
+                                        <img loading="lazy" src="33973da6beab4392e93e2edca6dd34bf.jpg" alt="风景照" class="w-full h-auto block rounded-sm">
                                     </div>
                                 </div>
                                 <div class="w-1/3 z-20 transform hover:scale-105 transition-all duration-500">
-                                    <div class="bg-white p-2 pb-8 md:p-4 md:pb-12 shadow-2xl border border-gray-100 rounded-sm">
-                                        <img loading="lazy" decoding="async" src="cc6c6feb2ed5ddd4f9b3d89278a24f30.jpg" alt="证件照" class="w-full aspect-[3/4] object-cover rounded-sm">
+                                    <div class="bg-white p-4 pb-12 shadow-2xl border border-gray-100 rounded-sm">
+                                        <img loading="lazy" src="cc6c6feb2ed5ddd4f9b3d89278a24f30.jpg" alt="证件照" class="w-full h-auto block rounded-sm">
                                     </div>
                                 </div>
-                                <div class="w-1/3 transform md:rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10 delay-100">
-                                    <div class="bg-white p-2 pb-6 md:p-3 md:pb-10 shadow-xl border border-gray-100 rounded-sm">
-                                        <img loading="lazy" decoding="async" src="d30a334d48491fe5acc278013d6bb293.jpg" alt="生活照" class="w-full aspect-[3/4] object-cover rounded-sm">
+                                <div class="w-1/3 transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
+                                    <div class="bg-white p-3 pb-10 shadow-xl border border-gray-100 rounded-sm">
+                                        <img loading="lazy" src="d30a334d48491fe5acc278013d6bb293.jpg" alt="生活照" class="w-full h-auto block rounded-sm">
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="w-full bg-[#F4F4F5] text-black relative border-t-4 border-white/50">
-                            <div class="max-w-6xl mx-auto w-full p-10 md:p-24 flex flex-col">
-                                <div class="text-3xl md:text-5xl font-black mb-16 tracking-tighter text-gray-900 flex items-center reveal">
-                                    Profile <svg class="w-6 h-6 md:w-10 md:h-10 ml-4" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+                            <div class="max-w-6xl mx-auto w-full p-24 flex flex-col">
+                                <div class="text-5xl font-black mb-16 tracking-tighter text-gray-900 flex items-center">
+                                    Profile <svg class="w-10 h-10 ml-4" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-16 relative">
-                                    <div class="reveal">
+                                <div class="grid grid-cols-2 gap-y-12 gap-x-16 relative">
+                                    <div>
                                         <p class="text-sm font-bold text-gray-800 tracking-widest uppercase mb-3">姓名 / 性别</p>
-                                        <p class="handwritten-text text-xl md:text-2xl leading-relaxed">蒲慧玟 / 女</p>
+                                        <p class="handwritten-text text-2xl leading-relaxed">蒲慧玟 / 女</p>
                                     </div>
-                                    <div class="reveal delay-100">
+                                    <div>
                                         <p class="text-sm font-bold text-gray-800 tracking-widest uppercase mb-3">教育背景</p>
-                                        <p class="handwritten-text text-lg md:text-xl leading-loose">湘南学院 (2023.09 - 2027.06)<br>视觉传达设计专业 本科</p>
+                                        <p class="handwritten-text text-xl leading-loose">湘南学院 (2023.09 - 2027.06)<br>视觉传达设计专业 本科</p>
                                     </div>
-                                    <div class="reveal delay-200">
+                                    <div>
                                         <p class="text-sm font-bold text-gray-800 tracking-widest uppercase mb-3">主修课程</p>
-                                        <p class="handwritten-text text-lg md:text-xl leading-loose">文创产品设计、书籍装帧设计、包装设计、广告设计等</p>
+                                        <p class="handwritten-text text-xl leading-loose">文创产品设计、书籍装帧设计、包装设计、广告设计等</p>
                                     </div>
-                                    <div class="reveal delay-300">
+                                    <div>
                                         <p class="text-sm font-bold text-gray-800 tracking-widest uppercase mb-3">联系邮箱</p>
-                                        <p class="handwritten-text text-lg md:text-xl leading-relaxed">2961007491@qq.com / tau.pp.323@gmail.com</p>
+                                        <p class="handwritten-text text-xl leading-relaxed">2961007491@qq.com / tau.pp.323@gmail.com</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="w-full bg-white text-black select-none">
-                            <div class="max-w-6xl mx-auto w-full p-10 md:p-24 flex flex-col justify-start">
-                                <div class="flex items-center mb-16 pb-4 border-b-[3px] border-black reveal">
+                            <div class="max-w-6xl mx-auto w-full p-24 flex flex-col justify-start">
+                                <div class="flex items-center mb-16 pb-4 border-b-[3px] border-black">
                                     <svg class="w-10 h-10 mr-4 text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 12l10 5 10-5M2 17l10 5 10-5"/></svg>
                                     <h3 class="text-3xl font-black tracking-widest text-black">实践经历 <span class="text-sm font-bold tracking-normal uppercase ml-4 text-gray-700">/ EXPERIENCE</span></h3>
                                 </div>
-                                <div class="mb-12 reveal">
+                                <div class="mb-12">
                                     <div class="flex items-center mb-4">
                                         <span class="text-base font-bold text-black w-24 tracking-widest">校外实践</span>
                                         <span class="text-2xl font-black text-black tracking-wider mx-4">七彩艺术学校</span>
@@ -346,12 +335,12 @@
                                         <div class="text-base text-gray-800 font-bold w-24 text-right pr-6 border-r-[3px] border-black flex flex-col justify-start pt-1 tracking-wider">
                                             <span>2024.03</span><span class="text-sm my-1">-</span><span>2024.07</span>
                                         </div>
-                                        <div class="flex-1 pl-6 text-base md:text-lg text-gray-900 leading-loose font-medium text-justify">
+                                        <div class="flex-1 pl-6 text-lg text-gray-900 leading-loose font-medium text-justify">
                                             工作经验：制定课程学习计划，指导学习内容，主要助教黑白画和动漫和手工课，当过主教一段时间，也上过一段时间水粉。
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mb-12 reveal delay-100">
+                                <div class="mb-12">
                                     <div class="flex items-center mb-4">
                                         <span class="text-base font-bold text-black w-24 tracking-widest">校外实践</span>
                                         <span class="text-2xl font-black text-black tracking-wider mx-4">斯达营地</span>
@@ -361,12 +350,12 @@
                                         <div class="text-base text-gray-800 font-bold w-24 text-right pr-6 border-r-[3px] border-black flex flex-col justify-start pt-1 tracking-wider">
                                             <span>2026.01</span><span class="text-sm my-1">-</span><span>2026.02</span>
                                         </div>
-                                        <div class="flex-1 pl-6 text-base md:text-lg text-gray-900 leading-loose font-medium text-justify">
+                                        <div class="flex-1 pl-6 text-lg text-gray-900 leading-loose font-medium text-justify">
                                             工作经验：每日剪辑两条视频发布，保证账号的运营，提升公司热度。
                                         </div>
                                     </div>
                                 </div>
-                                <div class="reveal delay-200">
+                                <div>
                                     <div class="flex items-center mb-4">
                                         <span class="text-base font-bold text-black w-24 tracking-widest">校外实践</span>
                                         <span class="text-2xl font-black text-black tracking-wider mx-4">广州前程网络科技公司</span>
@@ -376,7 +365,7 @@
                                         <div class="text-base text-gray-800 font-bold w-24 text-right pr-6 border-r-[3px] border-black flex flex-col justify-start pt-1 tracking-wider">
                                             <span>2026.06</span><span class="text-sm my-1">-</span><span>2026.09</span>
                                         </div>
-                                        <div class="flex-1 pl-6 text-base md:text-lg text-gray-900 leading-loose font-medium text-justify">
+                                        <div class="flex-1 pl-6 text-lg text-gray-900 leading-loose font-medium text-justify">
                                             AI片段生成，核对画面、口播、字幕匹配度。视频切片拆分：把完整长视频、成片素材，按镜头、卖点、场景进行精准切片分割，输出标准化短片段素材，素材收集归档，基础数据整理，简单录入表格，做好数据收集登记。
                                         </div>
                                     </div>
@@ -385,74 +374,77 @@
                         </div>
 
                         <div class="w-full bg-white text-black select-none border-t border-gray-100">
-                            <div class="max-w-6xl mx-auto w-full p-10 md:p-24 flex flex-col justify-start">
-                                <div class="flex items-center mb-8 reveal">
+                            <div class="max-w-6xl mx-auto w-full p-24 flex flex-col justify-start">
+                                <div class="flex items-center mb-8">
                                     <svg class="w-8 h-8 mr-4 text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
                                     <h3 class="text-2xl font-black tracking-wider text-black">个人技能 <span class="text-sm font-bold tracking-normal uppercase ml-4 text-gray-700">/ SKILL</span></h3>
                                 </div>
-                                <div class="text-base md:text-lg text-gray-900 leading-loose mb-16 font-medium tracking-wide reveal delay-100">
+                                <div class="text-lg text-gray-900 leading-loose mb-16 font-medium tracking-wide">
                                     <p class="mb-2">修图：PS接插件生图（banana/chatgpt）</p>
                                     <p class="mb-2">排版：Canva, Figma, ID</p>
                                     <p class="mb-2">数据整理：WPS, ai（gemini/workbuddy）</p>
                                     <p class="mb-2">剪辑：CapCut, PR</p>
                                     <p class="mt-6 leading-loose text-base text-gray-600">目前还在学习当今AI主流工具，网页设计和SVG交互正在学习阶段，希望在AI工具的帮助下提升工作质量和个人能力。</p>
                                 </div>
-                                <div class="w-full h-[3px] bg-black mb-12 line-grow"></div>
-                                <div class="flex items-center mb-8 reveal">
+                                <div class="w-full h-[3px] bg-black mb-12"></div>
+                                <div class="flex items-center mb-8">
                                     <svg class="w-8 h-8 mr-4 text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h5v7h7v9H6z"/></svg>
                                     <h3 class="text-2xl font-black tracking-wider text-black">自我评价 <span class="text-sm font-bold tracking-normal uppercase ml-4 text-gray-700">/ SELF-EVALUATION</span></h3>
                                 </div>
-                                <div class="text-base md:text-lg text-gray-900 leading-loose font-medium tracking-wide text-justify reveal delay-100">
+                                <div class="text-lg text-gray-900 leading-loose font-medium tracking-wide text-justify">
                                     本人性格开朗，有较强的学习能力。通过社会工作的经历，具备较强的心理素质，有较强的抗压能力和洞察力。爱好摄影，户外登山徒步，当过三年高中班长，胆子比较大，个人认为我是一个能很快适应工作环境的人，能欣然接受未知的挑战。
                                 </div>
                             </div>
                         </div>
                     `;
                 } else if (currentIndex === 1) {
-                    pageContainer.innerHTML = `
+                    contentHtml = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-[#FAFAFA] text-[#1A1A1A] flex flex-col items-center pb-32 font-serif relative">
                             
-                            <!-- 第一部分：排版设计横向滑动长图 -->
-                            <div class="w-full mt-16 md:mt-24 flex flex-col items-center overflow-hidden w-full">
-                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-8 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200 max-w-7xl px-4">
+                            <div class="w-full mt-24 flex flex-col items-center overflow-hidden w-full">
+                                <div class="w-full flex justify-center gap-12 pb-12 mb-8 text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200 max-w-7xl px-4">
                                     <span class="font-bold text-gray-800">Showcase</span>
                                     <span>Typography</span>
                                 </div>
                                 
-                                <div class="w-full flex overflow-x-auto gap-8 md:gap-12 pb-12 items-start hide-scrollbar reveal snap-x snap-mandatory">
-                                    <div class="flex-none w-[4vw] md:w-[15vw] snap-center"></div>
-                                    <div class="flex-none w-[80vw] md:w-[22vw] snap-center">
-                                        <img loading="lazy" decoding="async" src="typeset1.png" alt="排版1" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
+                                <!-- 完美居中且不裁切长图的核心修复代码 -->
+                                <div class="w-full flex overflow-x-auto gap-12 pb-12 items-center hide-scrollbar snap-x snap-mandatory">
+                                    <!-- 左右用 35vw 的空垫片，把图片顶到正中间，保证第一张图不被靠左裁切 -->
+                                    <div class="flex-none w-[35vw] snap-center"></div>
+                                    
+                                    <!-- h-[75vh] 和 object-contain 保证不论图片多长，都会完美缩放在屏幕里，绝不裁切 -->
+                                    <div class="flex-none h-[75vh] snap-center flex justify-center">
+                                        <img loading="lazy" src="typeset1.png" alt="排版1" class="h-full w-auto object-contain shadow-2xl transition-transform hover:scale-[1.02]">
                                     </div>
-                                    <div class="flex-none w-[80vw] md:w-[22vw] snap-center">
-                                        <img loading="lazy" decoding="async" src="typeset2.png" alt="排版2" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
+                                    <div class="flex-none h-[75vh] snap-center flex justify-center">
+                                        <img loading="lazy" src="typeset2.png" alt="排版2" class="h-full w-auto object-contain shadow-2xl transition-transform hover:scale-[1.02]">
                                     </div>
-                                    <div class="flex-none w-[80vw] md:w-[22vw] snap-center">
-                                        <img loading="lazy" decoding="async" src="typeset3.png" alt="排版3" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
+                                    <div class="flex-none h-[75vh] snap-center flex justify-center">
+                                        <img loading="lazy" src="typeset3.png" alt="排版3" class="h-full w-auto object-contain shadow-2xl transition-transform hover:scale-[1.02]">
                                     </div>
-                                    <div class="flex-none w-[80vw] md:w-[22vw] snap-center">
-                                        <img loading="lazy" decoding="async" src="typeset4.png" alt="排版4" class="w-full h-auto shadow-xl transition-transform hover:scale-[1.02]">
+                                    <div class="flex-none h-[75vh] snap-center flex justify-center">
+                                        <img loading="lazy" src="typeset4.png" alt="排版4" class="h-full w-auto object-contain shadow-2xl transition-transform hover:scale-[1.02]">
                                     </div>
-                                    <div class="flex-none w-[4vw] md:w-[15vw] snap-center"></div>
+                                    
+                                    <div class="flex-none w-[35vw] snap-center"></div>
                                 </div>
                                 
-                                <div class="text-center text-gray-400 text-xs tracking-widest uppercase animate-pulse mt-4">
+                                <div class="text-center text-gray-400 text-xs tracking-widest uppercase mt-4">
                                     ← Swipe horizontally to explore →
                                 </div>
                             </div>
 
-                            <!-- 第二部分：微信公众号跳转卡片 -->
-                            <div class="w-full max-w-5xl mt-24 flex flex-col items-center px-6 reveal">
-                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-12 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200">
+                            <div class="w-full max-w-5xl mt-24 flex flex-col items-center px-6">
+                                <div class="w-full flex justify-center gap-12 pb-12 mb-12 text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200">
                                     <span class="font-bold text-gray-800">Official Account</span>
                                     <span>WeChat</span>
                                 </div>
                                 <h3 class="text-3xl font-black font-serif text-gray-900 mb-6">公众号图文排版</h3>
-                                <p class="text-gray-500 mb-10 text-sm tracking-wider font-sans">点击下方卡片前往微信体验完整动效与排版细节</p>
+                                <p class="text-gray-500 mb-10 text-sm tracking-wider font-sans">点击下方卡片前往微信体验完整排版细节</p>
                                 
-                                <a href="https://mp.weixin.qq.com/s/z_S_V9oitqtmesdYH8iHaw" target="_blank" class="w-full max-w-3xl bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col md:flex-row group font-sans">
-                                    <div class="w-full md:w-1/3 bg-gray-50 flex items-center justify-center p-10 group-hover:bg-[#07C160]/10 transition-colors border-r border-gray-100">
+                                <a href="https://mp.weixin.qq.com/s/z_S_V9oitqtmesdYH8iHaw" target="_blank" class="w-full max-w-3xl bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-row group font-sans">
+                                    <div class="w-1/3 bg-gray-50 flex items-center justify-center p-10 group-hover:bg-[#07C160]/10 transition-colors border-r border-gray-100">
                                         <svg class="w-16 h-16 text-[#07C160]" fill="currentColor" viewBox="0 0 24 24"><path d="M8.5,13.5 C7.67157288,13.5 7,12.8284271 7,12 C7,11.1715729 7.67157288,10.5 8.5,10.5 C9.32842712,10.5 10,11.1715729 10,12 C10,12.8284271 9.32842712,13.5 8.5,13.5 Z M15.5,13.5 C14.6715729,13.5 14,12.8284271 14,12 C14,11.1715729 14.6715729,10.5 15.5,10.5 C16.3284271,10.5 17,11.1715729 17,12 C17,12.8284271 16.3284271,13.5 15.5,13.5 Z M12,22 C6.4771525,22 2,17.5228475 2,12 C2,6.4771525 6.4771525,2 12,2 C17.5228475,2 22,6.4771525 22,12 C22,17.5228475 17.5228475,22 12,22 Z"></path></svg>
                                     </div>
                                     <div class="p-8 flex flex-col justify-center flex-1">
@@ -462,9 +454,8 @@
                                 </a>
                             </div>
 
-                            <!-- 第三部分：小红书账号运营 -->
-                            <div class="w-full max-w-5xl mt-32 flex flex-col items-center px-6 reveal delay-100">
-                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-12 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200">
+                            <div class="w-full max-w-5xl mt-32 flex flex-col items-center px-6">
+                                <div class="w-full flex justify-center gap-12 pb-12 mb-12 text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-200">
                                     <span class="font-bold text-gray-800">Social Media</span>
                                     <span>Xiaohongshu</span>
                                 </div>
@@ -474,197 +465,92 @@
                                 </p>
                                 
                                 <div class="w-full max-w-3xl bg-white border border-gray-200 rounded-xl shadow-lg p-4 transition-transform hover:scale-[1.01] duration-500">
-                                    <img loading="lazy" decoding="async" src="xhs.png" alt="小红书运营展示" class="w-full h-auto rounded" onerror="this.src='data:image/svg+xml;utf8,<svg viewBox=%220 0 800 400%22 xmlns=%22http://www.w3.org/2000/svg%22><rect width=%22800%22 height=%22400%22 fill=%22%23f3f4f6%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2220%22 font-family=%22sans-serif%22>请将小红书截图命名为 xhs.png 并放入文件夹</text></svg>';">
+                                    <img loading="lazy" src="xhs.png" alt="小红书运营展示" class="w-full h-auto block rounded">
                                 </div>
                             </div>
 
                         </div>
                     `;
                 } else if (currentIndex === 2) {
-                    pageContainer.innerHTML = `
+                    contentHtml = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-white text-[#1A1A1A] flex justify-center pb-24 font-serif relative">
-                            <div class="w-full max-w-[90vw] md:max-w-7xl mt-16 md:mt-24 flex flex-col relative z-10 px-4">
-                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-8 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
+                            <div class="w-full max-w-7xl mt-24 flex flex-col relative z-10 px-4">
+                                <div class="w-full flex justify-center gap-12 pb-12 mb-8 text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
                                     <span class="font-bold text-gray-800">Showcase</span>
                                     <span>Brand Design</span>
                                 </div>
-                                <!-- 强制手机和电脑上都是左右并排 -->
-                                <div class="grid grid-cols-2 gap-4 md:gap-16 w-full reveal items-start">
-                                    <img loading="lazy" decoding="async" src="brand1.png" alt="品牌包装设计1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01]">
-                                    <img loading="lazy" decoding="async" src="brand2.png" alt="品牌包装设计2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] delay-100">
+                                <div class="grid grid-cols-2 gap-16 w-full items-start">
+                                    <img loading="lazy" src="brand1.png" alt="品牌包装设计1" class="w-full h-auto block shadow-2xl transition-transform hover:scale-[1.01]">
+                                    <img loading="lazy" src="brand2.png" alt="品牌包装设计2" class="w-full h-auto block shadow-2xl transition-transform hover:scale-[1.01]">
                                 </div>
                             </div>
                         </div>
                     `;
                 } else if (currentIndex === 3) {
-                    pageContainer.innerHTML = `
+                    contentHtml = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-white text-[#1A1A1A] flex justify-center pb-24 font-serif relative">
-                            <div class="w-full max-w-[90vw] md:max-w-7xl mt-16 md:mt-24 flex flex-col relative z-10 px-4">
-                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-8 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
+                            <div class="w-full max-w-7xl mt-24 flex flex-col relative z-10 px-4">
+                                <div class="w-full flex justify-center gap-12 pb-12 mb-8 text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
                                     <span class="font-bold text-gray-800">Showcase</span>
                                     <span>Craft Design</span>
                                 </div>
-                                <!-- 强制手机和电脑上都是左右并排 -->
-                                <div class="grid grid-cols-2 gap-4 md:gap-16 w-full reveal items-start">
-                                    <img loading="lazy" decoding="async" src="craft1.png" alt="文创设计1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01]">
-                                    <img loading="lazy" decoding="async" src="craft2.png" alt="文创设计2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] delay-100">
+                                <div class="grid grid-cols-2 gap-16 w-full items-start">
+                                    <img loading="lazy" src="craft1.png" alt="文创设计1" class="w-full h-auto block shadow-2xl transition-transform hover:scale-[1.01]">
+                                    <img loading="lazy" src="craft2.png" alt="文创设计2" class="w-full h-auto block shadow-2xl transition-transform hover:scale-[1.01]">
                                 </div>
                             </div>
                         </div>
                     `;
                 } else if (currentIndex === 4) {
-                    pageContainer.innerHTML = `
+                    contentHtml = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-white text-[#1A1A1A] flex justify-center pb-24 font-serif relative">
-                            <div class="w-full max-w-[90vw] md:max-w-6xl mt-16 md:mt-24 flex flex-col relative z-10 px-4">
-                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-12 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
+                            <div class="w-full max-w-6xl mt-24 flex flex-col relative z-10 px-4">
+                                <div class="w-full flex justify-center gap-12 pb-12 mb-12 text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
                                     <span class="font-bold text-gray-800">Showcase</span>
                                     <span>Character IP</span>
                                 </div>
                                 
-                                <div class="w-full mb-8 md:mb-12 reveal">
-                                    <img loading="lazy" decoding="async" src="ip1.png" alt="IP设计1" class="w-full h-auto block shadow-2xl">
+                                <div class="w-full mb-12">
+                                    <img loading="lazy" src="ip1.png" alt="IP设计1" class="w-full h-auto block shadow-2xl">
                                 </div>
                                 
-                                <!-- 强制手机和电脑上都是左右并排 -->
-                                <div class="grid grid-cols-2 gap-4 md:gap-12 w-full reveal items-start">
-                                    <img loading="lazy" decoding="async" src="ip2.jpg" alt="IP设计2" class="w-full h-auto block shadow-2xl">
-                                    <img loading="lazy" decoding="async" src="ip3.jpg" alt="IP设计3" class="w-full h-auto block shadow-2xl">
+                                <div class="grid grid-cols-2 gap-12 w-full items-start">
+                                    <img loading="lazy" src="ip2.jpg" alt="IP设计2" class="w-full h-auto block shadow-2xl">
+                                    <img loading="lazy" src="ip3.jpg" alt="IP设计3" class="w-full h-auto block shadow-2xl">
                                 </div>
                             </div>
                         </div>
                     `;
                 } else if (currentIndex === 5) {
-                    // ================= VOL.06 短视频创作：提速去自动播放，强行并列，取消裁切 =================
-                    pageContainer.innerHTML = `
+                    contentHtml = `
                         ${generateHeroSection(data)}
                         <div class="w-full bg-[#0D0D0D] text-[#F7F6F2] pb-32 relative overflow-hidden">
-                            <div class="relative z-10 w-full max-w-[95vw] md:max-w-7xl mx-auto px-2 md:px-4 mt-16 md:mt-24 gap-16 md:gap-24 flex flex-col">
+                            <div class="relative z-10 w-full max-w-7xl mx-auto mt-24 gap-24 flex flex-col px-4">
                                 
-                                <!-- 移除 autoplay 并加入 preload="metadata" 进行极致网络提速 -->
-                                <div class="grid grid-cols-12 gap-4 md:gap-8 w-full items-center reveal">
-                                    <div class="col-span-7 md:col-span-8 w-full bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-1">
-                                        <video preload="metadata" class="portfolio-video w-full h-auto block" src="video1.mp4" controls playsinline></video>
+                                <div class="grid grid-cols-12 gap-8 w-full items-center">
+                                    <div class="col-span-9 w-full bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-1">
+                                        <video class="w-full h-auto block" src="video1.mp4" controls playsinline></video>
                                     </div>
-                                    <div class="col-span-5 md:col-span-4 flex flex-col justify-center text-left order-2 px-2 md:px-6">
-                                        <h3 class="text-sm md:text-3xl font-black font-serif mb-2 md:mb-4 text-white tracking-widest">华洋汽水广告</h3>
-                                        <div class="w-6 md:w-12 h-1 bg-white/30 mb-3 md:mb-6"></div>
-                                        <p class="text-[10px] md:text-lg text-gray-400 tracking-widest leading-relaxed">自拍自剪</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-12 gap-4 md:gap-8 w-full items-center reveal delay-100">
-                                    <div class="col-span-5 md:col-span-4 flex flex-col justify-center text-right order-1 px-2 md:px-6">
-                                        <h3 class="text-sm md:text-3xl font-black font-serif mb-2 md:mb-4 text-white tracking-widest">坳上古村宣传</h3>
-                                        <div class="w-6 md:w-12 h-1 bg-white/30 mb-3 md:mb-6 ml-auto"></div>
-                                        <p class="text-[10px] md:text-lg text-gray-400 tracking-widest leading-relaxed">AI创作静态图片剪成</p>
-                                    </div>
-                                    <div class="col-span-7 md:col-span-8 w-full bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-2">
-                                        <video preload="metadata" class="portfolio-video w-full h-auto block" src="video2.mp4" controls playsinline></video>
+                                    <div class="col-span-3 flex flex-col justify-center text-left order-2 px-6">
+                                        <h3 class="text-3xl font-black font-serif mb-4 text-white tracking-widest">华洋汽水广告</h3>
+                                        <div class="w-12 h-1 bg-white/30 mb-6"></div>
+                                        <p class="text-lg text-gray-400 tracking-widest leading-loose">自拍自剪</p>
                                     </div>
                                 </div>
                                 
-                            </div>
-                        </div>
-                    `;
-                } else if (currentIndex === 6) {
-                    pageContainer.innerHTML = `
-                        ${generateHeroSection(data)}
-                        <div class="w-full bg-white text-[#1A1A1A] flex justify-center pb-32 font-serif relative">
-                            <div class="w-full max-w-[90vw] md:max-w-7xl mt-16 md:mt-24 flex flex-col relative z-10 px-4">
-                                <div class="w-full flex justify-center gap-6 md:gap-12 pb-12 mb-16 text-[10px] md:text-xs tracking-[0.2em] text-gray-400 uppercase font-sans border-b border-gray-100">
-                                    <span class="font-bold text-gray-800">Showcase</span>
-                                    <span>Gallery</span>
-                                </div>
-
-                                <!-- 强制手机端也是2列并排 -->
-                                <div class="grid grid-cols-2 gap-4 md:gap-12 w-full reveal items-start mb-12 md:mb-32">
-                                    <img loading="lazy" decoding="async" src="1.png" alt="长图1" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01]">
-                                    <img loading="lazy" decoding="async" src="2.png" alt="长图2" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] delay-100">
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-4 md:gap-12 w-full reveal items-start">
-                                    <img loading="lazy" decoding="async" src="3.png" alt="长图3" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01]">
-                                    <img loading="lazy" decoding="async" src="4.png" alt="长图4" class="w-full h-auto block shadow-2xl transition-transform duration-700 hover:scale-[1.01] delay-100">
+                                <div class="grid grid-cols-12 gap-8 w-full items-center">
+                                    <div class="col-span-3 flex flex-col justify-center text-right order-1 px-6">
+                                        <h3 class="text-3xl font-black font-serif mb-4 text-white tracking-widest">坳上古村宣传</h3>
+                                        <div class="w-12 h-1 bg-white/30 mb-6 ml-auto"></div>
+                                        <p class="text-lg text-gray-400 tracking-widest leading-loose">AI创作静态图片剪成</p>
+                                    </div>
+                                    <div class="col-span-9 w-full bg-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 relative order-2">
+                                        <video class="w-full h-auto block" src="video2.mp4" controls playsinline></video>
+                                    </div>
                                 </div>
                                 
                             </div>
                         </div>
-                    `;
-                }
-                
-                viewScroll.scrollTop = 0;
-                
-                if (currentIndex > 0) {
-                    rootStyle.setProperty('--bg-color', '#000000');
-                } else {
-                    rootStyle.setProperty('--bg-color', data.themeColor);
-                }
-                
-                const backBtn = document.getElementById('scroll-back-btn');
-                if (currentIndex > 0) {
-                    backBtn.classList.remove('text-gray-800', 'border-gray-800/30', 'bg-white/80');
-                    backBtn.classList.add('text-white', 'border-white/30', 'bg-black/40');
-                } else {
-                    backBtn.classList.remove('text-white', 'border-white/30', 'bg-black/40');
-                    backBtn.classList.add('text-gray-800', 'border-gray-800/30', 'bg-white/80');
-                }
-                
-                viewDetail.classList.replace('view-active', 'view-hidden');
-                viewScroll.classList.replace('view-hidden', 'view-active');
-                
-                setTimeout(() => {
-                    initScrollAnimations();
-                }, 100);
-                
-            }, 650); 
-        }
-
-        function initScrollAnimations() {
-            const observerOptions = {
-                root: document.getElementById('view-scroll'),
-                rootMargin: '0px 0px -10% 0px',
-                threshold: 0.1
-            };
-
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-
-            const revealElements = document.querySelectorAll('.reveal, .line-grow');
-            revealElements.forEach(el => observer.observe(el));
-        }
-
-        function handleBackToDetail() {
-            rootStyle.setProperty('--bg-color', bookData[currentIndex].themeColor);
-            
-            const backBtn = document.getElementById('scroll-back-btn');
-            backBtn.classList.remove('text-gray-800', 'border-gray-800/30', 'bg-white/80');
-            backBtn.classList.add('text-white', 'border-white/30', 'bg-black/40');
-            
-            viewScroll.classList.replace('view-active', 'view-hidden');
-            viewDetail.classList.replace('view-hidden', 'view-active');
-            
-            setTimeout(() => {
-                viewDetail.classList.remove('is-open');
-                
-                const videos = document.querySelectorAll('.portfolio-video');
-                videos.forEach(video => video.pause());
-            }, 50);
-        }
-
-        function handleBackToShelf() {
-            rootStyle.setProperty('--bg-color', '#F4F3ED');
-            viewDetail.classList.replace('view-active', 'view-hidden');
-            setTimeout(() => { viewShelf.classList.replace('view-hidden', 'view-active'); }, 400);
-        }
-    </script>
-</body>
-</html>
